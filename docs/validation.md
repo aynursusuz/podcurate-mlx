@@ -2,7 +2,7 @@
 
 The complete default pipeline ran with real MLX models on **Apple M4 Pro, 14 CPU cores,
 24 GiB unified memory**, in a fresh Python 3.12 environment installed with
-`uv sync --locked --extra all --extra dev`. Models were already downloaded locally.
+`uv sync --locked --python 3.12 --extra all --extra dev`. Models were already downloaded locally.
 Machine-readable measurements, model identities, fixture hashes and export hashes are in
 [validation-results.json](validation-results.json).
 
@@ -84,7 +84,7 @@ There is no original FP32 Qwen numerical-parity claim.
 ## Reproduce
 
 ```bash
-uv sync --locked --extra all --extra dev
+uv sync --locked --python 3.12 --extra all --extra dev
 source .venv/bin/activate
 python scripts/download_fleurs.py --out work/fleurs
 # Cache the pinned models first. This runner intentionally requires local weights.

@@ -10,7 +10,7 @@ Native Apple Silicon, Python 3.12 and FFmpeg. Model downloads happen on first us
 brew install ffmpeg uv
 git clone https://github.com/aynursusuz/podcurate-mlx.git
 cd podcurate-mlx
-uv sync --extra all --extra dev
+uv sync --locked --python 3.12 --extra all --extra dev
 source .venv/bin/activate
 ```
 
