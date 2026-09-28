@@ -93,6 +93,8 @@ The exact stored-record digest was unchanged. This was **one run on preseeded
 stub results referencing one generated tone**; it proves the tested cache traversal
 and integrity behavior, not the cost of inference or hashing one million distinct
 audio files. The RSS value excludes the seeding process and real MLX models.
+Filesystem pages may remain cached after seeding; this is not a cold-disk test.
+Process RSS also excludes the operating system's file cache.
 
 ```bash
 python scripts/benchmark_resume.py --records 1000000 \
