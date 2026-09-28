@@ -2,6 +2,38 @@
 
 Local podcast and synthetic-speech curation on Apple Silicon: **prepare → score → calibrate → select → export**. English, Mandarin Chinese, Japanese and Turkish. Default neural inference runs on **MLX**, one model at a time; FFmpeg, SQLite and numerical processing run on CPU.
 
+## Filtering at a glance
+
+🟩 **Required** for the profile · 🟦 **Policy-controlled**: use only when explicitly bounded.
+These colors describe selection rules, not measured quality or model confidence.
+All default scoring stages run for both profiles; their acceptance requirements differ.
+
+| Check | Model or measurement | TTS profile | ASR profile |
+|---|---|---|---|
+| **Audio integrity** | FFmpeg; duration, silence and PCM hash | 🟩 Valid audio; silence excluded | 🟩 Valid audio; silence excluded |
+| **Transcript agreement** | [MLX Whisper](src/podcurate_mlx/backends.py); CER for all four languages, WER for en/tr | 🟩 Reference-agreement bounds, or decoder bounds without a reference | 🟩 Same text checks |
+| **Text–audio alignment** | [MLX Qwen](src/podcurate_mlx/alignment.py) for en/zh/ja; MLX Wav2Vec2 CTC for tr | 🟩 Valid intervals and reference-unit coverage | 🟩 Same alignment checks |
+| **Speakers and overlap** | [MLX Nemotron](src/podcurate_mlx/speakers.py); speaker activity and simultaneous speech | 🟩 One detected speaker, overlap bound; capacity saturation requires review | 🟦 Speaker changes and overlap alone do not reject audio |
+| **Speaker consistency / reference** | [MLX ECAPA](src/podcurate_mlx/speakers.py); within-recording consistency and optional reference cosine | 🟩 Consistency bound; similarity bound when a reference exists | 🟦 Apply bounds if required by the policy |
+| **Acoustic quality** | [Native MLX DNSMOS P.835](src/podcurate_mlx/quality.py); SIG, BAK and OVRL | 🟩 Explicit OVRL bound | 🟦 Noise score alone is not an automatic rejection rule |
+| **Segment boundaries** | Stateful VAD preparation; forced-cut and unscored-tail flags | 🟩 Flagged boundaries cannot be accepted | 🟩 Same boundary protection |
+| **Duplicates and data splits** | Exact analysis-PCM deduplication; source/speaker/reference groups | 🟩 Deduplicate accepted records; keep export groups together | 🟩 Same export protections |
+
+Bounds are chosen separately for each **profile × language × podcast/synthetic source**.
+A reference-free speaker score does not verify target identity. Nemotron has eight
+source-local speaker channels; unknown speakers have no speaker-disjoint guarantee.
+
+| Decision | Meaning | Exported? |
+|---|---|---|
+| 🟢 **`accept`** | Required checks and the supplied policy pass; the record is not an accepted PCM duplicate | Yes |
+| 🟡 **`review`** | For example: missing required measurements/bounds, invalid alignment, or a flagged cut | No |
+| 🔴 **`reject`** | For example: an explicit bound fails, silence, empty transcript, or an accepted PCM duplicate | No |
+| 🟣 **`error`** | For example: decoding/inference failure or a changed source/reference | No |
+
+These are decision examples, not a priority order: multiple problems can coexist.
+The exact rules live in [metrics.py](src/podcurate_mlx/metrics.py); every selection writes
+`decisions.jsonl` with its reasons. Missing required measurements never produce acceptance.
+
 ## Install
 
 Native Apple Silicon, Python 3.12 and FFmpeg. Model downloads happen on first use. Source audio is never overwritten.
@@ -12,6 +44,7 @@ git clone https://github.com/aynursusuz/podcurate-mlx.git
 cd podcurate-mlx
 uv sync --locked --python 3.12 --extra all --extra dev
 source .venv/bin/activate
+podcurate-mlx --help
 ```
 
 `uv.lock` fixes Python dependencies; model commits and conversion hashes are recorded in each run. PyTorch is installed for the initial Turkish checkpoint conversion and upstream packaging; default acoustic inference uses MLX. Original-framework comparisons are separate development checks.
@@ -30,6 +63,11 @@ Synthetic speech requires the text supplied to the generator. `speaker_id` and `
 Prepared intervals have integer `start_sample`, `end_sample` and `timebase_hz`; seconds-based `start` / `end` remain supported. Known speaker IDs must mean the same person across files. Episode-local diarization labels are never treated as global speaker IDs.
 
 ## Commands
+
+**Choose your starting point:** long, untranscribed podcasts start at `prepare`;
+already bounded clips (up to 30 seconds), including synthetic speech, start at `score`.
+Both then use `calibrate → select → export`. Selection needs your own `policy.json`;
+scoring alone does not require quality thresholds.
 
 Prepare long, untranscribed podcast episodes (omit reference text):
 
@@ -91,13 +129,26 @@ podcurate-mlx export selected-asr --out corpus-asr --sample-rate preserve --seed
 
 The training sample rate is explicit: a 16 kHz analysis copy never silently becomes training audio. Default split fractions are 90%/5%/5%, configurable with `--train` / `--validation`; small grouped corpora need not approximate these fractions. Shared sources, known speakers, reference sources and exact PCM copies are transitively grouped before splitting. **Unknown speakers have no speaker-disjoint guarantee.** Export can resume, and refuses changed source or completed output files.
 
+## Code and documentation
+
+The CLI exposes five commands. To follow an input through the code:
+
+- [cli.py](src/podcurate_mlx/cli.py) parses commands; [pipeline.py](src/podcurate_mlx/pipeline.py) validates manifests and writes selection decisions.
+- [preparing.py](src/podcurate_mlx/preparing.py) handles continuous episodes; [audio.py](src/podcurate_mlx/audio.py) bounds audio reads.
+- [stages.py](src/podcurate_mlx/stages.py) loads models sequentially and stores resumable stage results in SQLite.
+- [metrics.py](src/podcurate_mlx/metrics.py) defines text metrics and profile rules; [curation.py](src/podcurate_mlx/curation.py) samples human review records and exports grouped FLAC datasets.
+- Model adapters are linked in the filtering table above. The attributed `ecapa_*` modules retain upstream model/frontend code and license text.
+- [tests/](tests/) contains regression and opt-in model checks; [scripts/](scripts/) contains the FLEURS downloader and reproducible end-to-end runner.
+
 ## Evidence and limits
 
+- [Runtime, preprocessing and resume behavior](docs/runtime.md)
 - [Research and source mapping](docs/research.md)
 - [DNSMOS numerical equivalence](docs/dnsmos-validation.md)
 - [ECAPA and diarization validation](docs/speaker-validation.md)
 - [Alignment validation](docs/alignment-validation.md)
-- [End-to-end checks](docs/validation.md)
+- [Long-recording memory and interruption checks](docs/stream-validation.md)
+- [End-to-end checks and reproduction](docs/validation.md) · [Recorded results and model identities](docs/validation-results.json)
 
 Numerical parity is separate from quality calibration. FLEURS checks exercise real speech in the four languages; they do not measure performance on the user's podcasts or speech generators. Nemotron has eight recording-local speaker channels and can miss low-level overlapping speech. Qwen does not provide an alignment confidence score; none is invented. Turkish does not use Qwen's unsupported language path.
 
