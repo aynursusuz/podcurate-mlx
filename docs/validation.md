@@ -8,8 +8,8 @@ Machine-readable measurements, model identities, fixture hashes and export hashe
 
 ## Software checks
 
-**107 tests passed, 5 opt-in model tests skipped** in the default local suite; Ruff and
-`git diff --check` passed. The five real-model tests were also run separately with their
+**107 tests passed, 5 opt-in model tests skipped** in the default local suite; Ruff passed. The vendored ECAPA model preserves the
+upstream final blank line so its source checksum remains exact. The five real-model tests were also run separately with their
 required cached weights/reference dependencies: DNSMOS 3/3; alignment 2/2.
 The final combined run, with those checks enabled, passed **112/112 tests** in 42.96 s. Additional
 real ECAPA and diarization comparisons are documented in their validation notes.
