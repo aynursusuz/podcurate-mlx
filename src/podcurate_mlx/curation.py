@@ -9,9 +9,10 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+from . import audio
 from .audio import info, resampling_warning, sha256
 from .metrics import profile_decision, validate_profiles
-from .pipeline import dump
+from .pipeline import SourceHashes, dump
 
 
 def calibrate(
@@ -154,6 +155,33 @@ def _verify_flac(path, expected_samples, rate):
     return samples, int(details["channels"])
 
 
+def _verifier_identity():
+    """Bind cached full-decode results to the implementation and media tools."""
+    return {
+        "curation_sha256": sha256(Path(__file__)),
+        "audio_sha256": sha256(Path(audio.__file__)),
+        **{
+            tool: subprocess.run(
+                [tool, "-version"], capture_output=True, text=True, check=True
+            ).stdout.strip()
+            for tool in ("ffmpeg", "ffprobe")
+        },
+    }
+
+
+def _check_cached_metadata(metadata, expected, frames):
+    samples = metadata.get("num_samples")
+    channels = metadata.get("channels")
+    if (
+        any(metadata.get(key) != value for key, value in expected.items())
+        or type(samples) is not int
+        or abs(samples - frames) > 1
+        or type(channels) is not int
+        or channels < 1
+    ):
+        raise ValueError("completed export metadata changed")
+
+
 def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05):
     if sample_rate != "preserve":
         try:
@@ -173,7 +201,8 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
         "seed": seed,
         "train": train,
         "validation": validation,
-        "algorithm": "flac-groups-v2",
+        "algorithm": "flac-groups-v3",
+        "verifier": _verifier_identity(),
     }
     out.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(out / "export.sqlite") as db:
@@ -191,6 +220,7 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
             raise ValueError("export identity changed; use a new output directory")
         if not saved:
             db.execute("INSERT INTO config VALUES(?)", (dump(config),))
+        source_hash = SourceHashes(db)
         with accepted.open(encoding="utf8") as f:
             for seq, line in enumerate(f):
                 row = json.loads(line)
@@ -200,6 +230,12 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
                     raise ValueError(
                         "selection lacks source sample-rate provenance; rescore and select"
                     )
+                prior = db.execute("SELECT id,json FROM items WHERE seq=?", (seq,)).fetchone()
+                if prior:
+                    if prior != (row["id"], line.strip()):
+                        raise ValueError("export input rows changed")
+                    # The item and all its group unions were committed together.
+                    continue
                 source = row.get("input", {})
                 keys = ["audio:" + row["source_sha256"], "pcm:" + row["pcm_sha256"]]
                 if source.get("source_id"):
@@ -211,9 +247,6 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
                 roots = sorted({_root(db, key) for key in keys})
                 for key in roots[1:]:
                     db.execute("UPDATE groups SET parent=? WHERE key=?", (roots[0], key))
-                prior = db.execute("SELECT id,json FROM items WHERE seq=?", (seq,)).fetchone()
-                if prior and prior != (row["id"], line.strip()):
-                    raise ValueError("export input rows changed")
                 db.execute(
                     "INSERT OR IGNORE INTO items VALUES(?,?,?,?)",
                     (seq, row["id"], line.strip(), keys[0]),
@@ -224,8 +257,15 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
         output_rates = Counter()
         for _seq, identifier, encoded, key in db.execute("SELECT * FROM items ORDER BY seq"):
             row = json.loads(encoded)
-            root = _root(db, key)
-            group = hashlib.sha256(root.encode()).hexdigest()
+            saved = db.execute("SELECT json,hash FROM outputs WHERE id=?", (identifier,)).fetchone()
+            metadata = json.loads(saved[0]) if saved else None
+            # All input unions finish before the first output is committed, so a
+            # saved output contains the final group for this immutable selection.
+            group = (
+                metadata["group_id"]
+                if saved
+                else hashlib.sha256(_root(db, key).encode()).hexdigest()
+            )
             fraction = int(hashlib.sha256((seed + "\0" + group).encode()).hexdigest(), 16) / 2**256
             split = (
                 "train"
@@ -239,11 +279,17 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
             cached = db.execute(
                 "SELECT hash,rate FROM sources WHERE path=?", (str(path),)
             ).fetchone()
-            digest = cached[0] if cached else sha256(path)
+            digest = source_hash(path)
             if digest != row["source_sha256"]:
                 raise ValueError(f"source changed before export: {identifier}")
-            source_rate = cached[1] if cached else int(info(path)["sample_rate"])
-            if source_rate <= 0:
+            if cached and cached[0] == digest:
+                source_rate = cached[1]
+            elif saved:
+                # The source SHA is unchanged; its initially probed rate remains valid.
+                source_rate = metadata.get("source_sample_rate")
+            else:
+                source_rate = int(info(path)["sample_rate"])
+            if type(source_rate) is not int or source_rate <= 0:
                 raise ValueError("source sample rate must be positive")
             if row["source_sample_rate"] != source_rate:
                 raise ValueError(f"source sample rate differs from scoring: {identifier}")
@@ -259,11 +305,21 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
             frames = round((row["end"] - row["start"]) * rate)
             target = out / split / (hashlib.sha256(identifier.encode()).hexdigest() + ".flac")
             target.parent.mkdir(exist_ok=True)
-            saved = db.execute("SELECT json,hash FROM outputs WHERE id=?", (identifier,)).fetchone()
             if saved:
                 if not target.exists() or sha256(target) != saved[1]:
                     raise ValueError(f"completed export file changed: {target.name}")
-                _verify_flac(target, frames, rate)
+                _check_cached_metadata(
+                    metadata,
+                    {
+                        "id": identifier,
+                        "audio": str(target.relative_to(out)),
+                        "split": split,
+                        "sample_rate": rate,
+                        "source_sample_rate": source_rate,
+                        "source_sha256": digest,
+                    },
+                    frames,
+                )
                 continue
             temporary = target.with_suffix(".partial.flac")
             subprocess.run(

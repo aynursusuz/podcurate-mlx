@@ -1,0 +1,671 @@
+{
+  "baseline_commit": "948f5dad2d1352985609ed9dfaa3752027296514",
+  "scope": "Measured IO/orchestration changes; no million-unique-audio inference or calibrated quality claim.",
+  "cpu_io": {
+    "before": {
+      "runs": [
+        {
+          "scope": "CPU orchestration/IO only; ASR and quality are deterministic STUBS",
+          "fixture": {
+            "records": 200,
+            "unique_audio_files": 1,
+            "samples": 20000,
+            "sample_rate": 16000,
+            "wav_sha256": "99c6a7a480d0e5000614b8121c5d5062fcf14fb56c9c7205ae313eed07f2e1c0",
+            "explicit_end_and_reference_end": true
+          },
+          "provenance": {
+            "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+            "platform": "macOS-26.6.2-arm64-arm-64bit",
+            "numpy": "2.5.3",
+            "ffmpeg": "ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers",
+            "sqlite": "3.51.3",
+            "git_revision": null,
+            "git_dirty": false,
+            "runner_sha256": "bde27852eda085453769be38798ecea5e955095f27af6334edabd25b9cf95ac1",
+            "sources_sha256": {
+              "podcurate_mlx.audio": "19735b677a0a82dfdb15098fc73a9d9e26810bc5e149548ae743c4d13aa075b2",
+              "podcurate_mlx.pipeline": "141351c0e33b661a4c6a01a6e04efc4d167b4d2a135946402f43c7491fefdef4",
+              "podcurate_mlx.stages": "91e1d2e77e4ad1189725666bc3c79bca4e4b3b0c8a581ce33b105b18faa41a1d"
+            }
+          },
+          "measurements": {
+            "cold": {
+              "wall_seconds": 25.538809332996607,
+              "calls": {
+                "records_write_statements": 600,
+                "records_changed_rows": 600,
+                "sqlite_commit_calls": 604,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 600,
+                "ffprobe_calls": 401,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 200,
+                  "quality": 200
+                }
+              },
+              "result": {
+                "scored": 200,
+                "resumed": 0,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 41615360,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            },
+            "cached_resume": {
+              "wall_seconds": 5.014631333062425,
+              "calls": {
+                "records_write_statements": 200,
+                "records_changed_rows": 200,
+                "sqlite_commit_calls": 204,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 0,
+                "ffprobe_calls": 200,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 0,
+                  "quality": 0
+                }
+              },
+              "result": {
+                "scored": 0,
+                "resumed": 200,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 43401216,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            }
+          },
+          "digest_exclusions": [
+            "seconds fields (stage timings)",
+            "audio/reference_audio directory prefixes"
+          ],
+          "rss_scope": "Cumulative process lifetime; resume memory is not isolated",
+          "outputs_identical": true
+        },
+        {
+          "scope": "CPU orchestration/IO only; ASR and quality are deterministic STUBS",
+          "fixture": {
+            "records": 200,
+            "unique_audio_files": 1,
+            "samples": 20000,
+            "sample_rate": 16000,
+            "wav_sha256": "99c6a7a480d0e5000614b8121c5d5062fcf14fb56c9c7205ae313eed07f2e1c0",
+            "explicit_end_and_reference_end": true
+          },
+          "provenance": {
+            "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+            "platform": "macOS-26.6.2-arm64-arm-64bit",
+            "numpy": "2.5.3",
+            "ffmpeg": "ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers",
+            "sqlite": "3.51.3",
+            "git_revision": null,
+            "git_dirty": false,
+            "runner_sha256": "bde27852eda085453769be38798ecea5e955095f27af6334edabd25b9cf95ac1",
+            "sources_sha256": {
+              "podcurate_mlx.audio": "19735b677a0a82dfdb15098fc73a9d9e26810bc5e149548ae743c4d13aa075b2",
+              "podcurate_mlx.pipeline": "141351c0e33b661a4c6a01a6e04efc4d167b4d2a135946402f43c7491fefdef4",
+              "podcurate_mlx.stages": "91e1d2e77e4ad1189725666bc3c79bca4e4b3b0c8a581ce33b105b18faa41a1d"
+            }
+          },
+          "measurements": {
+            "cold": {
+              "wall_seconds": 25.527371958014555,
+              "calls": {
+                "records_write_statements": 600,
+                "records_changed_rows": 600,
+                "sqlite_commit_calls": 604,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 600,
+                "ffprobe_calls": 401,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 200,
+                  "quality": 200
+                }
+              },
+              "result": {
+                "scored": 200,
+                "resumed": 0,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 41385984,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            },
+            "cached_resume": {
+              "wall_seconds": 5.015921458951198,
+              "calls": {
+                "records_write_statements": 200,
+                "records_changed_rows": 200,
+                "sqlite_commit_calls": 204,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 0,
+                "ffprobe_calls": 200,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 0,
+                  "quality": 0
+                }
+              },
+              "result": {
+                "scored": 0,
+                "resumed": 200,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 43171840,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            }
+          },
+          "digest_exclusions": [
+            "seconds fields (stage timings)",
+            "audio/reference_audio directory prefixes"
+          ],
+          "rss_scope": "Cumulative process lifetime; resume memory is not isolated",
+          "outputs_identical": true
+        }
+      ],
+      "median_seconds": {
+        "cold": 25.53309064550558,
+        "cached_resume": 5.015276396006811
+      }
+    },
+    "after": {
+      "runs": [
+        {
+          "scope": "CPU orchestration/IO only; ASR and quality are deterministic STUBS",
+          "fixture": {
+            "records": 200,
+            "unique_audio_files": 1,
+            "samples": 20000,
+            "sample_rate": 16000,
+            "wav_sha256": "99c6a7a480d0e5000614b8121c5d5062fcf14fb56c9c7205ae313eed07f2e1c0",
+            "explicit_end_and_reference_end": true
+          },
+          "provenance": {
+            "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+            "platform": "macOS-26.6.2-arm64-arm-64bit",
+            "numpy": "2.5.3",
+            "ffmpeg": "ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers",
+            "sqlite": "3.51.3",
+            "git_revision": "948f5dad2d1352985609ed9dfaa3752027296514",
+            "git_dirty": true,
+            "runner_sha256": "bde27852eda085453769be38798ecea5e955095f27af6334edabd25b9cf95ac1",
+            "sources_sha256": {
+              "podcurate_mlx.audio": "19735b677a0a82dfdb15098fc73a9d9e26810bc5e149548ae743c4d13aa075b2",
+              "podcurate_mlx.pipeline": "141351c0e33b661a4c6a01a6e04efc4d167b4d2a135946402f43c7491fefdef4",
+              "podcurate_mlx.stages": "b177b9ca49eeab3174f2007fe9872a3628351f14607bd31067bc54984eee6a67"
+            }
+          },
+          "measurements": {
+            "cold": {
+              "wall_seconds": 10.70590404199902,
+              "calls": {
+                "records_write_statements": 400,
+                "records_changed_rows": 400,
+                "sqlite_commit_calls": 404,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 400,
+                "ffprobe_calls": 1,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 200,
+                  "quality": 200
+                }
+              },
+              "result": {
+                "scored": 200,
+                "resumed": 0,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 41123840,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            },
+            "cached_resume": {
+              "wall_seconds": 0.04707991692703217,
+              "calls": {
+                "records_write_statements": 0,
+                "records_changed_rows": 0,
+                "sqlite_commit_calls": 4,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 0,
+                "ffprobe_calls": 0,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 0,
+                  "quality": 0
+                }
+              },
+              "result": {
+                "scored": 0,
+                "resumed": 200,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 42319872,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            }
+          },
+          "digest_exclusions": [
+            "seconds fields (stage timings)",
+            "audio/reference_audio directory prefixes"
+          ],
+          "rss_scope": "Cumulative process lifetime; resume memory is not isolated",
+          "outputs_identical": true
+        },
+        {
+          "scope": "CPU orchestration/IO only; ASR and quality are deterministic STUBS",
+          "fixture": {
+            "records": 200,
+            "unique_audio_files": 1,
+            "samples": 20000,
+            "sample_rate": 16000,
+            "wav_sha256": "99c6a7a480d0e5000614b8121c5d5062fcf14fb56c9c7205ae313eed07f2e1c0",
+            "explicit_end_and_reference_end": true
+          },
+          "provenance": {
+            "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+            "platform": "macOS-26.6.2-arm64-arm-64bit",
+            "numpy": "2.5.3",
+            "ffmpeg": "ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers",
+            "sqlite": "3.51.3",
+            "git_revision": "948f5dad2d1352985609ed9dfaa3752027296514",
+            "git_dirty": true,
+            "runner_sha256": "bde27852eda085453769be38798ecea5e955095f27af6334edabd25b9cf95ac1",
+            "sources_sha256": {
+              "podcurate_mlx.audio": "19735b677a0a82dfdb15098fc73a9d9e26810bc5e149548ae743c4d13aa075b2",
+              "podcurate_mlx.pipeline": "141351c0e33b661a4c6a01a6e04efc4d167b4d2a135946402f43c7491fefdef4",
+              "podcurate_mlx.stages": "b177b9ca49eeab3174f2007fe9872a3628351f14607bd31067bc54984eee6a67"
+            }
+          },
+          "measurements": {
+            "cold": {
+              "wall_seconds": 10.735598957980983,
+              "calls": {
+                "records_write_statements": 400,
+                "records_changed_rows": 400,
+                "sqlite_commit_calls": 404,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 400,
+                "ffprobe_calls": 1,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 200,
+                  "quality": 200
+                }
+              },
+              "result": {
+                "scored": 200,
+                "resumed": 0,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 41304064,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            },
+            "cached_resume": {
+              "wall_seconds": 0.046357791987247765,
+              "calls": {
+                "records_write_statements": 0,
+                "records_changed_rows": 0,
+                "sqlite_commit_calls": 4,
+                "ffmpeg_version_calls": 1,
+                "ffmpeg_decode_calls": 0,
+                "ffprobe_calls": 0,
+                "stub_factory_calls": {
+                  "asr": 1,
+                  "quality": 1
+                },
+                "stub_inference_calls": {
+                  "asr": 0,
+                  "quality": 0
+                }
+              },
+              "result": {
+                "scored": 0,
+                "resumed": 200,
+                "errors": 0
+              },
+              "process_lifetime_peak_rss_bytes": 42434560,
+              "output": {
+                "records": 200,
+                "canonical_sha256": "c688ebff0e76b0cb86bed02515ae183c989c9dcd3e104f1ad7300d04ddda4013"
+              }
+            }
+          },
+          "digest_exclusions": [
+            "seconds fields (stage timings)",
+            "audio/reference_audio directory prefixes"
+          ],
+          "rss_scope": "Cumulative process lifetime; resume memory is not isolated",
+          "outputs_identical": true
+        }
+      ],
+      "median_seconds": {
+        "cold": 10.720751499990001,
+        "cached_resume": 0.04671885445713997
+      }
+    },
+    "all_canonical_outputs_equal": true
+  },
+  "real_models": {
+    "real-before": {
+      "total_seconds": 43.951746042002924,
+      "phases_seconds": {
+        "asr_only": 19.472389833070338,
+        "add_remaining_stages": 16.67313654103782,
+        "resume_all": 2.200634208973497,
+        "retry_isolated_fault": 2.3212416670285165,
+        "review_sample": 0.002172083011828363,
+        "repeat_review_sample": 0.0021570000099018216,
+        "select_tts": 0.011004208005033433,
+        "export_tts": 0.9313153339317068,
+        "resume_export_tts": 0.6401794169796631,
+        "select_asr": 0.011405416997149587,
+        "export_asr": 0.9215498329140246,
+        "resume_export_asr": 0.6408122080611065
+      },
+      "resources": {
+        "ru_maxrss_raw": 1835171840,
+        "native_unit": "bytes",
+        "peak_rss_bytes": 1835171840,
+        "scope": "process lifetime high-water mark, not a per-stage delta",
+        "mlx_peak_memory_bytes": 2483589010,
+        "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+      },
+      "status": "passed"
+    },
+    "real-after": {
+      "total_seconds": 39.1290958749596,
+      "phases_seconds": {
+        "asr_only": 18.47062029200606,
+        "add_remaining_stages": 14.23480733402539,
+        "resume_all": 2.0686912919627503,
+        "retry_isolated_fault": 2.141780083067715,
+        "review_sample": 0.002158791059628129,
+        "repeat_review_sample": 0.0021609580144286156,
+        "select_tts": 0.01189237495418638,
+        "export_tts": 0.9867899999953806,
+        "resume_export_tts": 0.06619120796676725,
+        "select_asr": 0.010901457979343832,
+        "export_asr": 0.9830807909602299,
+        "resume_export_asr": 0.06518262496683747
+      },
+      "resources": {
+        "ru_maxrss_raw": 1846853632,
+        "native_unit": "bytes",
+        "peak_rss_bytes": 1846853632,
+        "scope": "process lifetime high-water mark, not a per-stage delta",
+        "mlx_peak_memory_bytes": 2483589010,
+        "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+      },
+      "status": "passed"
+    },
+    "real-before-2": {
+      "total_seconds": 38.26679216697812,
+      "phases_seconds": {
+        "asr_only": 16.828504083910957,
+        "add_remaining_stages": 13.37122775008902,
+        "resume_all": 2.281451874994673,
+        "retry_isolated_fault": 2.412841874989681,
+        "review_sample": 0.0022007919615134597,
+        "repeat_review_sample": 0.0019011249532923102,
+        "select_tts": 0.011598166893236339,
+        "export_tts": 0.9620660829823464,
+        "resume_export_tts": 0.6703308330615982,
+        "select_asr": 0.011277290992438793,
+        "export_asr": 0.9660009170183912,
+        "resume_export_asr": 0.6665468749124557
+      },
+      "resources": {
+        "ru_maxrss_raw": 1874100224,
+        "native_unit": "bytes",
+        "peak_rss_bytes": 1874100224,
+        "scope": "process lifetime high-water mark, not a per-stage delta",
+        "mlx_peak_memory_bytes": 2483589010,
+        "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+      },
+      "status": "passed"
+    },
+    "real-after-2": {
+      "total_seconds": 36.63278949994128,
+      "phases_seconds": {
+        "asr_only": 17.946200833073817,
+        "add_remaining_stages": 12.175213749986142,
+        "resume_all": 2.034669457934797,
+        "retry_isolated_fault": 2.16044533404056,
+        "review_sample": 0.002652958035469055,
+        "repeat_review_sample": 0.002012917073443532,
+        "select_tts": 0.010855125030502677,
+        "export_tts": 1.032507749972865,
+        "resume_export_tts": 0.067539417068474,
+        "select_asr": 0.011329167056828737,
+        "export_asr": 1.0244697500020266,
+        "resume_export_asr": 0.0683741249376908
+      },
+      "resources": {
+        "ru_maxrss_raw": 1857847296,
+        "native_unit": "bytes",
+        "peak_rss_bytes": 1857847296,
+        "scope": "process lifetime high-water mark, not a per-stage delta",
+        "mlx_peak_memory_bytes": 2483589010,
+        "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+      },
+      "status": "passed"
+    },
+    "timing_scope": "Two runs/version with populated model cache; first after-run overlapped ordinary CPU unit tests; second pair ran sequentially without another task benchmark. Small-cohort timings vary and are not a throughput forecast.",
+    "fixtures": {
+      "source_manifest_sha256": "d718d1587027c80bd3bd34b0a06cdd08e5b753932f163f94c500ae9f16a08e71",
+      "records": 16,
+      "manifest_sha256": "6876286457396c6a4903c36c663686c3d0d01e4d419fd9cd6ede694b314eb5bd"
+    },
+    "stage_metric_results_per_run": 80,
+    "all_stage_metrics_exactly_equal": true,
+    "tts_export_hashes": {
+      "test/272f915bd9b8e667c1534c3ba0402438bd9cc1288e775ad43588fac1ed67e320.flac": "a20d52a1714ffa5a4481d575b0297b886148c2552b1e21bf75296e213202fab9",
+      "test/780cb414f2d69ff739339d25a4d6454794eb4e1dd8f06d49fedf00994970f1a3.flac": "8adc6f4d612551a1ee6f09e04ecadcd13fba0ed03774880144971d8f04f81be5",
+      "train/21caf37e6b44f3bd00db4e04a623b0623a9411ef3a5255982b8c102881351fb2.flac": "32d9cf89cf1585c49d5ede031f381b00f707731360de8282404c8f568211cdde",
+      "train/2ea385c4fe54a5509a338cedd78994e14f64d2136108f8ead4581cc2c216e2cb.flac": "599016279dd3bcb6466e5cf918d5ad9a782d40f02a27435232c5e0ed70bfa3e5",
+      "train/aaa7b6e0b8a5196dec5709ffae2cb34c40b9760ea5cac9664e376e04a26d8e21.flac": "94635c9d50259da7fc0221e7ff30e3ca989773b32129dbcafce631d575842bac",
+      "validation/246da9111f3e2423a8790fc41b9bbef18db15a0b77d783ad32adccadbc2833ca.flac": "36a44e50d81d5019294130f48f5f70707d6f4ae9f11bb30605ca5c0a018d7a7e",
+      "validation/2cb687ebc67c9c8e43a1ed434b0b9e45cd595a14241470c1001160f899a625e9.flac": "13ac6186c6c557160d4a1bf7cc0b21de8c58af78dce59f864d0737e25ed89290",
+      "metadata.jsonl": "b3906e5d6cc2490063542dec4c09b1063f248b7f62060afa360fdf62fd742325"
+    },
+    "tts_selection_counts": {
+      "real-before": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "real-after": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "real-before-2": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "real-after-2": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      }
+    },
+    "asr_export_hashes": {
+      "test/272f915bd9b8e667c1534c3ba0402438bd9cc1288e775ad43588fac1ed67e320.flac": "a20d52a1714ffa5a4481d575b0297b886148c2552b1e21bf75296e213202fab9",
+      "test/780cb414f2d69ff739339d25a4d6454794eb4e1dd8f06d49fedf00994970f1a3.flac": "8adc6f4d612551a1ee6f09e04ecadcd13fba0ed03774880144971d8f04f81be5",
+      "train/21caf37e6b44f3bd00db4e04a623b0623a9411ef3a5255982b8c102881351fb2.flac": "32d9cf89cf1585c49d5ede031f381b00f707731360de8282404c8f568211cdde",
+      "train/2ea385c4fe54a5509a338cedd78994e14f64d2136108f8ead4581cc2c216e2cb.flac": "599016279dd3bcb6466e5cf918d5ad9a782d40f02a27435232c5e0ed70bfa3e5",
+      "train/aaa7b6e0b8a5196dec5709ffae2cb34c40b9760ea5cac9664e376e04a26d8e21.flac": "94635c9d50259da7fc0221e7ff30e3ca989773b32129dbcafce631d575842bac",
+      "validation/246da9111f3e2423a8790fc41b9bbef18db15a0b77d783ad32adccadbc2833ca.flac": "36a44e50d81d5019294130f48f5f70707d6f4ae9f11bb30605ca5c0a018d7a7e",
+      "validation/2cb687ebc67c9c8e43a1ed434b0b9e45cd595a14241470c1001160f899a625e9.flac": "13ac6186c6c557160d4a1bf7cc0b21de8c58af78dce59f864d0737e25ed89290",
+      "metadata.jsonl": "b3906e5d6cc2490063542dec4c09b1063f248b7f62060afa360fdf62fd742325"
+    },
+    "asr_selection_counts": {
+      "real-before": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "real-after": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "real-before-2": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "real-after-2": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      }
+    },
+    "all_flac_and_export_metadata_exactly_equal": true
+  },
+  "hardware": {
+    "chip": "Apple M4 Pro",
+    "memory_bytes": "25769803776",
+    "physical_cpu_cores": "14"
+  },
+  "million_cached_resume": {
+    "seed": {
+      "records": 1000000,
+      "unique_audio_files": 1,
+      "samples_per_file": 4000,
+      "scope": "Synthetic cached rows copied from deterministic STUB bootstrap outputs",
+      "bootstrap": {
+        "scored": 1,
+        "resumed": 0,
+        "errors": 0
+      },
+      "bootstrap_stub_calls": {
+        "asr": 1,
+        "quality": 1
+      },
+      "records_sha256": "d4339b0a4369ef9b3082803514a176721b3e8b5a1d945780c113efb0cc2e3fd9",
+      "seed_seconds": 31.311560917063616,
+      "disk_bytes": 2929961836,
+      "provenance": {
+        "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+        "platform": "macOS-26.6.2-arm64-arm-64bit",
+        "numpy": "2.5.3",
+        "sqlite": "3.51.3",
+        "git_revision": "948f5dad2d1352985609ed9dfaa3752027296514",
+        "runner_sha256": "976e2439bf4fa5a41d148803c4c4410b2fa0fdc35b9c14318784dce25339da0d",
+        "sources_sha256": {
+          "podcurate_mlx.audio": "19735b677a0a82dfdb15098fc73a9d9e26810bc5e149548ae743c4d13aa075b2",
+          "podcurate_mlx.pipeline": "141351c0e33b661a4c6a01a6e04efc4d167b4d2a135946402f43c7491fefdef4",
+          "podcurate_mlx.stages": "b177b9ca49eeab3174f2007fe9872a3628351f14607bd31067bc54984eee6a67"
+        }
+      }
+    },
+    "measurement": {
+      "scope": "Preseeded cached resume; NOT million-file hashing or speech inference",
+      "wall_seconds": 69.77235787501559,
+      "verification_seconds": 6.003296541981399,
+      "peak_rss_bytes": 47579136,
+      "rss_scope": "Fresh measurement child process; excludes seeding",
+      "result": {
+        "scored": 0,
+        "resumed": 1000000,
+        "errors": 0
+      },
+      "counters": {
+        "source_check_calls": 1000000,
+        "source_hash_computations": 1,
+        "ffmpeg_decode_calls": 0,
+        "ffprobe_calls": 0,
+        "ffmpeg_version_calls": 1,
+        "records_changed_rows": 0
+      },
+      "stub_inference_calls": {
+        "asr": 0,
+        "quality": 0
+      },
+      "table_counts": {
+        "base": 1000000,
+        "records": 1000000,
+        "results": 2000000
+      },
+      "checks": {
+        "all_resumed": true,
+        "records_unchanged": true,
+        "no_stub_inference": true,
+        "no_decode_or_records_write": true
+      },
+      "records_digest": {
+        "records": 1000000,
+        "sha256": "d4339b0a4369ef9b3082803514a176721b3e8b5a1d945780c113efb0cc2e3fd9"
+      },
+      "database_bytes": 2817953792,
+      "disk_bytes": 2929962975,
+      "provenance": {
+        "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+        "platform": "macOS-26.6.2-arm64-arm-64bit",
+        "numpy": "2.5.3",
+        "sqlite": "3.51.3",
+        "git_revision": "948f5dad2d1352985609ed9dfaa3752027296514",
+        "runner_sha256": "976e2439bf4fa5a41d148803c4c4410b2fa0fdc35b9c14318784dce25339da0d",
+        "sources_sha256": {
+          "podcurate_mlx.audio": "19735b677a0a82dfdb15098fc73a9d9e26810bc5e149548ae743c4d13aa075b2",
+          "podcurate_mlx.pipeline": "141351c0e33b661a4c6a01a6e04efc4d167b4d2a135946402f43c7491fefdef4",
+          "podcurate_mlx.stages": "b177b9ca49eeab3174f2007fe9872a3628351f14607bd31067bc54984eee6a67"
+        }
+      },
+      "instrumentation": "Wall includes call counters and periodic disk-budget checks"
+    }
+  }
+}

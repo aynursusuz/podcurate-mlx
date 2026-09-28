@@ -6,7 +6,9 @@ runtime. The reference-comparison environments are separate from this inference 
 
 - **Audio:** FFmpeg continuously decodes podcasts into bounded 16 kHz mono float32 blocks.
   Analysis leaves original files intact. Export explicitly preserves or selects a training
-  sample rate and verifies the actual FLAC frames by reopening the file.
+  sample rate and verifies new FLAC frames by reopening the file. Completed export
+  resumes use matching file hashes and stored verification metadata under a pinned
+  verifier/tool identity.
 - **Sample-rate provenance:** Probe, decode, streaming and export select the first audio
   stream (`0:a:0`). Scored rows retain the file's `source_sample_rate` and the 16 kHz
   `analysis_sample_rate`. Optional source-rate policy bounds apply before export and are
@@ -44,8 +46,9 @@ Sample-rate auditing changes the pinned audio/orchestration code identity. Score
 created before this change require a new `--out` database; they are never rewritten.
 Old scores can still be selected, but a newly required source-rate bound produces review
 when that measurement is missing. Export refuses selections lacking source-rate provenance:
-rescore and select first. Export metadata uses `flac-groups-v2`; earlier exports need a new
-output directory. Preparation now pins the audio adapter too; regenerate earlier prepared
+rescore and select first. Export metadata uses `flac-groups-v3`, with pinned verifier and
+media-tool identities; earlier exports need a new output directory. Preparation pins the
+audio adapter too; regenerate earlier prepared
 manifests into a new output before reusing diarization. This prevents old automatic stream
 selection from mixing with the explicit first-stream rule. Within this version, prepare,
 score and export resume remain supported.

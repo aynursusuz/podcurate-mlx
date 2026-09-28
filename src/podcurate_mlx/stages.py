@@ -28,7 +28,7 @@ class Stage:
 def bounds(row, path):
     if "start_sample" in row:
         return row["start_sample"] / row["timebase_hz"], row["end_sample"] / row["timebase_hz"]
-    return row.get("start", 0.0), row.get("end", duration(path))
+    return row.get("start", 0.0), row["end"] if "end" in row else duration(path)
 
 
 def model_identity(model):
@@ -73,6 +73,7 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
             ["ffmpeg", "-version"], capture_output=True, text=True, check=True
         ).stdout.splitlines()[0],
     }
+    identities = {}
     with sqlite3.connect(db_path) as db:
         db.execute("PRAGMA temp_store=FILE")
         db.executescript("""
@@ -120,14 +121,14 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                 (seq, row["id"], row.get("source_sha256"), dump(merged)),
             )
 
-        def infer(model, name, seq, row):
+        def infer(model, name, seq, row, audio=None):
             prior = db.execute(
                 "SELECT json FROM results WHERE id=? AND stage=?", (row["id"], name)
             ).fetchone()
             if prior and not (retry_errors and json.loads(prior[0]).get("error")):
-                return
+                return False
             if row.get("error") or row.get("silent"):
-                return
+                return False
             start = time.monotonic()
             try:
                 if source_hash(Path(row["audio"])) != row["source_sha256"]:
@@ -137,7 +138,9 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                     and source_hash(Path(row["reference_audio"])) != row["reference_sha256"]
                 ):
                     raise ValueError("reference changed during scoring")
-                audio = decode(Path(row["audio"]), row["start"], row["end"])
+                prepared = name == "diarization" and row["input"].get("prepared_diarization")
+                if audio is None and not prepared:
+                    audio = decode(Path(row["audio"]), row["start"], row["end"])
                 if name == "asr":
                     metrics = model(audio, row["language"])
                     if row["input"].get("reference_text"):
@@ -159,9 +162,9 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                     metrics["alignment_text_source"] = (
                         "reference" if row["input"].get("reference_text") else "asr"
                     )
-                elif name == "diarization" and row["input"].get("prepared_diarization"):
+                elif prepared:
                     prior_identity = row["input"].get("diarization_identity")
-                    if prior_identity != model_identity(model):
+                    if prior_identity != identities[name]:
                         raise ValueError("prepared diarization model identity differs")
                     if row["input"].get("source_sha256") != row["source_sha256"]:
                         raise ValueError("prepared source hash differs")
@@ -202,9 +205,11 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
             db.execute("INSERT OR IGNORE INTO changed VALUES(?)", (row["id"],))
             publish(seq, row)
             db.commit()
+            return True
 
         def register(spec, model):
-            identity = dump(model_identity(model))
+            identities[spec.name] = model_identity(model)
+            identity = dump(identities[spec.name])
             saved = db.execute("SELECT identity FROM stages WHERE name=?", (spec.name,)).fetchone()
             if saved and saved[0] != identity:
                 raise ValueError(f"run identity changed for stage {spec.name}; use a new database")
@@ -217,6 +222,7 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
         try:
             register(stages[0], model)
             for seq, item in enumerate(entries(manifest)):
+                audio = None
                 try:
                     db.execute("INSERT INTO seen VALUES(?)", (item["id"],))
                 except sqlite3.IntegrityError as exc:
@@ -252,7 +258,13 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                     if item.get("reference_audio"):
                         ref = (manifest.parent / item["reference_audio"]).resolve(strict=True)
                         a = item.get("reference_start", 0.0)
-                        b = item.get("reference_end", min(duration(ref), a + 30.0))
+                        b = (
+                            item["reference_end"]
+                            if "reference_end" in item
+                            else saved["reference_end"]
+                            if saved and saved.get("reference_audio") == str(ref)
+                            else min(duration(ref), a + 30.0)
+                        )
                         row.update(
                             reference_audio=str(ref),
                             reference_sha256=source_hash(ref),
@@ -281,7 +293,8 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                             (str(path), digest, rate),
                         )
                         row.update(source_sample_rate=rate, analysis_sample_rate=SAMPLE_RATE)
-                        row.update(start=a, end=b, **signals(decode(path, a, b)))
+                        audio = decode(path, a, b)
+                        row.update(start=a, end=b, **signals(audio))
                         if row["silent"]:
                             row["text"] = ""
                     rate = row.get("source_sample_rate")
@@ -298,14 +311,16 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                     if saved and not (retry_errors and saved.get("error")):
                         raise ValueError(f"source became unavailable: {item['id']}") from exc
                     row["error"] = f"{type(exc).__name__}: {exc}"
-                if not saved or (retry_errors and saved.get("error")):
+                base_changed = not saved or (retry_errors and saved.get("error"))
+                if base_changed:
                     db.execute(
                         "INSERT OR REPLACE INTO base VALUES(?,?,?)", (seq, item["id"], dump(row))
                     )
                     db.execute("INSERT OR IGNORE INTO changed VALUES(?)", (item["id"],))
-                infer(model, "asr", seq, row)
-                publish(seq, row)
-                db.commit()
+                published = infer(model, "asr", seq, row, audio)
+                if base_changed and not published:
+                    publish(seq, row)
+                    db.commit()
         except RuntimeError as exc:
             if "changed" in str(exc):
                 raise ValueError(str(exc)) from exc
@@ -324,10 +339,19 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
             model = spec.factory()
             try:
                 register(spec, model)
-                for seq, encoded in db.execute("SELECT seq,json FROM base ORDER BY seq"):
+                for seq, encoded in db.execute(
+                    "SELECT b.seq,b.json FROM base b LEFT JOIN results r "
+                    "ON r.id=b.id AND r.stage=? "
+                    "WHERE json_extract(b.json,'$.language') IN ("
+                    + ",".join("?" for _ in spec.languages)
+                    + ") AND json_extract(b.json,'$.error') IS NULL "
+                    "AND COALESCE(json_extract(b.json,'$.silent'),0)=0 "
+                    "AND (r.id IS NULL OR (? AND json_extract(r.json,'$.error') IS NOT NULL)) "
+                    "ORDER BY b.seq",
+                    (spec.name, *spec.languages, retry_errors),
+                ):
                     row = json.loads(encoded)
-                    if row["language"] in spec.languages:
-                        infer(model, spec.name, seq, row)
+                    infer(model, spec.name, seq, row)
             finally:
                 release(model)
                 del model

@@ -165,6 +165,11 @@ provenance needed by this version; see [compatibility details](docs/runtime.md).
 
 ## Code and documentation
 
+For large corpora, the pipeline reuses the analysis PCM for ASR, skips redundant
+duration probes, and avoids rewriting cached stage results. Models and filter
+settings stay the same. See [performance and measurement scope](docs/performance.md)
+before extrapolating to millions of recordings.
+
 The CLI exposes five commands. To follow an input through the code:
 
 - [cli.py](src/podcurate_mlx/cli.py) parses commands; [pipeline.py](src/podcurate_mlx/pipeline.py) validates manifests and writes selection decisions.
@@ -177,6 +182,7 @@ The CLI exposes five commands. To follow an input through the code:
 ## Evidence and limits
 
 - [Runtime, preprocessing and resume behavior](docs/runtime.md)
+- [Performance, safe reuse and reproducible benchmarks](docs/performance.md)
 - [Research and source mapping](docs/research.md)
 - [DNSMOS numerical equivalence](docs/dnsmos-validation.md)
 - [ECAPA and diarization validation](docs/speaker-validation.md)
