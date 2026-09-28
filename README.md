@@ -11,6 +11,7 @@ All default scoring stages run for both profiles; their acceptance requirements 
 | Check | Model or measurement | TTS profile | ASR profile |
 |---|---|---|---|
 | **Audio integrity** | FFmpeg; duration, silence and PCM hash | 🟩 Valid audio; silence excluded | 🟩 Valid audio; silence excluded |
+| **Source sample rate** | FFprobe reads the original audio stream; conversion warnings remain separate from quality scores | 🟦 Set `source_sample_rate` bounds for the training task | 🟦 Same source-rate bounds; export upsampling cannot change this metric |
 | **Transcript agreement** | [MLX Whisper](src/podcurate_mlx/backends.py); CER for all four languages, WER for en/tr | 🟩 Reference-agreement bounds, or decoder bounds without a reference | 🟩 Same text checks |
 | **Text–audio alignment** | [MLX Qwen](src/podcurate_mlx/alignment.py) for en/zh/ja; MLX Wav2Vec2 CTC for tr | 🟩 Valid intervals and reference-unit coverage | 🟩 Same alignment checks |
 | **Speakers and overlap** | [MLX Nemotron](src/podcurate_mlx/speakers.py); speaker activity and simultaneous speech | 🟩 One detected speaker, overlap bound; capacity saturation requires review | 🟦 Speaker changes and overlap alone do not reject audio |
@@ -128,6 +129,39 @@ podcurate-mlx export selected-asr --out corpus-asr --sample-rate preserve --seed
 ```
 
 The training sample rate is explicit: a 16 kHz analysis copy never silently becomes training audio. Default split fractions are 90%/5%/5%, configurable with `--train` / `--validation`; small grouped corpora need not approximate these fractions. Shared sources, known speakers, reference sources and exact PCM copies are transitively grouped before splitting. **Unknown speakers have no speaker-disjoint guarantee.** Export can resume, and refuses changed source or completed output files.
+
+### Sample rates and quality
+
+Scoring records `source_sample_rate` from the file and `analysis_sample_rate` (16000 Hz).
+Scoring the primary audio and exporting print conversion warnings to stderr, once per rate pair
+per invocation. JSON results on stdout remain machine-readable. All audio operations use
+the first audio stream (`0:a:0`), so probing, scoring and export describe the same signal.
+
+| Conversion | Warning / consequence |
+|---|---|
+| 🟨 **16 → 48 kHz** | Upsampling does not restore missing frequency detail; the higher output rate is not evidence of higher quality. |
+| 🟨 **48 → 24 kHz** | Downsampling limits bandwidth to below 12 kHz. Choose the rate required by your training model. |
+| 🟦 **48 → 16 kHz analysis** | Models assess the analysis view, with bandwidth below 8 kHz; original training audio remains available. |
+| 🟨 **Mixed rates with `preserve`** | Export warns that the corpus contains multiple rates; choose an explicit rate if your trainer requires uniform input. |
+
+To exclude sources below a task-specific rate, add `"source_sample_rate":{"min":24000}`
+to the relevant profile/language/source bounds. **24000 is an example requirement, not a
+universal quality threshold.** Missing values require review; out-of-bound values reject.
+The bound applies before export, so converting a 16 kHz source to 48 kHz cannot satisfy it.
+
+Export metadata keeps `source_sample_rate`, `analysis_sample_rate`, output `sample_rate`
+and `sample_rate_warnings`. `run.json` contains conversion counts and mixed-output-rate
+warnings, including on resume. `source_timebase_hz` remains the coordinate system for
+segment boundaries, which can differ from the file's sample rate.
+
+Sample rate alone is not a perceptual quality score. These checks do not detect audio
+that was already upsampled before ingestion or measure its effective spectral bandwidth.
+DNSMOS scores are not penalized by an invented conversion formula. Conversion uses
+[FFmpeg's resampler](https://ffmpeg.org/ffmpeg-resampler.html).
+
+**Updating an existing run:** regenerate prepared manifests and scores with new `--out`
+paths, then select and export into a new directory. Earlier results lack the first-stream
+provenance needed by this version; see [compatibility details](docs/runtime.md).
 
 ## Code and documentation
 

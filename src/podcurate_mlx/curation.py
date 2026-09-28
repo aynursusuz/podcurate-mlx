@@ -5,9 +5,11 @@ import json
 import os
 import sqlite3
 import subprocess
+import sys
+from collections import Counter
 from pathlib import Path
 
-from .audio import info, sha256
+from .audio import info, resampling_warning, sha256
 from .metrics import profile_decision, validate_profiles
 from .pipeline import dump
 
@@ -171,7 +173,7 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
         "seed": seed,
         "train": train,
         "validation": validation,
-        "algorithm": "flac-groups-v1",
+        "algorithm": "flac-groups-v2",
     }
     out.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(out / "export.sqlite") as db:
@@ -182,7 +184,7 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
             CREATE TABLE IF NOT EXISTS items(seq INTEGER PRIMARY KEY,id TEXT UNIQUE,
                                             json TEXT,key TEXT);
             CREATE TABLE IF NOT EXISTS outputs(id TEXT PRIMARY KEY,json TEXT,hash TEXT);
-            CREATE TEMP TABLE sources(path TEXT PRIMARY KEY,hash TEXT);
+            CREATE TEMP TABLE sources(path TEXT PRIMARY KEY,hash TEXT,rate INTEGER);
         """)
         saved = db.execute("SELECT json FROM config").fetchone()
         if saved and saved[0] != dump(config):
@@ -194,6 +196,10 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
                 row = json.loads(line)
                 if row.get("status") != "accept":
                     raise ValueError("export accepts only accepted selection records")
+                if "source_sample_rate" not in row:
+                    raise ValueError(
+                        "selection lacks source sample-rate provenance; rescore and select"
+                    )
                 source = row.get("input", {})
                 keys = ["audio:" + row["source_sha256"], "pcm:" + row["pcm_sha256"]]
                 if source.get("source_id"):
@@ -214,6 +220,8 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
                 )
                 db.commit()
         counts = {"train": 0, "validation": 0, "test": 0}
+        conversions = Counter()
+        output_rates = Counter()
         for _seq, identifier, encoded, key in db.execute("SELECT * FROM items ORDER BY seq"):
             row = json.loads(encoded)
             root = _root(db, key)
@@ -228,12 +236,26 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
             )
             counts[split] += 1
             path = Path(row["audio"])
-            cached = db.execute("SELECT hash FROM sources WHERE path=?", (str(path),)).fetchone()
+            cached = db.execute(
+                "SELECT hash,rate FROM sources WHERE path=?", (str(path),)
+            ).fetchone()
             digest = cached[0] if cached else sha256(path)
-            db.execute("INSERT OR IGNORE INTO sources VALUES(?,?)", (str(path), digest))
             if digest != row["source_sha256"]:
                 raise ValueError(f"source changed before export: {identifier}")
-            rate = int(info(path)["sample_rate"]) if sample_rate == "preserve" else sample_rate
+            source_rate = cached[1] if cached else int(info(path)["sample_rate"])
+            if source_rate <= 0:
+                raise ValueError("source sample rate must be positive")
+            if row["source_sample_rate"] != source_rate:
+                raise ValueError(f"source sample rate differs from scoring: {identifier}")
+            db.execute(
+                "INSERT OR IGNORE INTO sources VALUES(?,?,?)", (str(path), digest, source_rate)
+            )
+            rate = source_rate if sample_rate == "preserve" else sample_rate
+            notice = resampling_warning(source_rate, rate)
+            if notice and (source_rate, rate) not in conversions:
+                print(f"warning: export: {notice}", file=sys.stderr)
+            conversions[source_rate, rate] += 1
+            output_rates[rate] += 1
             frames = round((row["end"] - row["start"]) * rate)
             target = out / split / (hashlib.sha256(identifier.encode()).hexdigest() + ".flac")
             target.parent.mkdir(exist_ok=True)
@@ -257,6 +279,8 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
                     str(path),
                     "-t",
                     str(row["end"] - row["start"]),
+                    "-map",
+                    "0:a:0",
                     "-vn",
                     "-ar",
                     str(rate),
@@ -280,6 +304,9 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
                 "text": source.get("reference_text") or row["text"],
                 "asr_text": row["text"],
                 "sample_rate": rate,
+                "source_sample_rate": source_rate,
+                "analysis_sample_rate": row.get("analysis_sample_rate", 16000),
+                "sample_rate_warnings": [notice] if notice else [],
                 "num_samples": samples,
                 "channels": channels,
                 "source_sha256": digest,
@@ -301,9 +328,28 @@ def export(selection, out, *, sample_rate, seed="0", train=0.9, validation=0.05)
             ):
                 f.write(encoded + "\n")
         os.replace(temporary, out / "metadata.jsonl")
+        warnings = []
+        if len(output_rates) > 1:
+            warning = (
+                "Mixed output sample rates: "
+                + ", ".join(f"{rate} Hz" for rate in sorted(output_rates))
+                + ". Use an explicit --sample-rate if training requires one rate."
+            )
+            print(f"warning: export: {warning}", file=sys.stderr)
+            warnings.append(warning)
         summary = {
             **config,
             "counts": counts,
+            "sample_rate_conversions": [
+                {
+                    "source_sample_rate": source_rate,
+                    "sample_rate": rate,
+                    "records": count,
+                    "warning": resampling_warning(source_rate, rate),
+                }
+                for (source_rate, rate), count in sorted(conversions.items())
+            ],
+            "sample_rate_warnings": warnings,
             "unknown_speakers_disjoint_guarantee": False,
             "selection": json.loads((selection / "summary.json").read_text()),
         }

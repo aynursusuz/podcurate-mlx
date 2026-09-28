@@ -6,6 +6,7 @@ import inspect
 import json
 import sqlite3
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from importlib.metadata import version
@@ -13,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .audio import decode, duration, sha256, signals
+from .audio import SAMPLE_RATE, decode, duration, info, resampling_warning, sha256, signals
 from .metrics import agreement, normalize
 
 
@@ -86,7 +87,10 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
             CREATE TABLE IF NOT EXISTS references_cache(key TEXT PRIMARY KEY, embedding BLOB);
             CREATE TEMP TABLE seen(id TEXT PRIMARY KEY);
             CREATE TEMP TABLE changed(id TEXT PRIMARY KEY);
+            CREATE TEMP TABLE source_rates(path TEXT, hash TEXT, rate INTEGER,
+                                           PRIMARY KEY(path, hash));
         """)
+        warned_rates = set()
         source_hash = SourceHashes(db)
         saved = db.execute("SELECT json FROM config WHERE id=1").fetchone()
         if saved and saved[0] != dump(config):
@@ -227,6 +231,13 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                     "boundary_cut": item.get("boundary_cut", False),
                 }
                 try:
+                    if (
+                        {"vad", "prepared_diarization", "analysis_audio_adapter_sha256"}
+                        & item.keys()
+                        and item.get("analysis_audio_adapter_sha256")
+                        != config["audio_adapter_sha256"]
+                    ):
+                        raise ValueError("prepared audio adapter differs; run prepare again")
                     path = resolve_audio(item, manifest)
                     digest = source_hash(path)
                     row.update(audio=str(path), source_sha256=digest)
@@ -258,9 +269,29 @@ def score_stages(manifest, db_path, stages, retry_errors=False):
                         row = saved
                     else:
                         a, b = bounds(item, path)
+                        cached_rate = db.execute(
+                            "SELECT rate FROM source_rates WHERE path=? AND hash=?",
+                            (str(path), digest),
+                        ).fetchone()
+                        rate = cached_rate[0] if cached_rate else int(info(path)["sample_rate"])
+                        if rate <= 0:
+                            raise ValueError("source sample rate must be positive")
+                        db.execute(
+                            "INSERT OR IGNORE INTO source_rates VALUES(?,?,?)",
+                            (str(path), digest, rate),
+                        )
+                        row.update(source_sample_rate=rate, analysis_sample_rate=SAMPLE_RATE)
                         row.update(start=a, end=b, **signals(decode(path, a, b)))
                         if row["silent"]:
                             row["text"] = ""
+                    rate = row.get("source_sample_rate")
+                    notice = resampling_warning(rate, SAMPLE_RATE) if rate is not None else None
+                    if notice and rate not in warned_rates:
+                        print(
+                            f"warning: analysis: {notice} Source files are unchanged.",
+                            file=sys.stderr,
+                        )
+                        warned_rates.add(rate)
                 except RuntimeError:
                     raise
                 except Exception as exc:

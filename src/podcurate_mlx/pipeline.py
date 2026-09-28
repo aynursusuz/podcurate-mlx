@@ -1,5 +1,6 @@
 """Streaming manifest processing; SQLite commits one completed record at a time."""
 
+import inspect
 import json
 import math
 import os
@@ -204,6 +205,7 @@ def prepare(manifest: Path, output: Path, vad, *, diarizer_factory=None) -> int:
 
 def _prepare(manifest: Path, output: Path, vad) -> int:
     count = 0
+    audio_identity = sha256(Path(inspect.getfile(decode)))
     with output.open("w", encoding="utf-8") as f:
         for row in entries(manifest):
             if row.get("kind") == "synthetic" or row.get("reference_text"):
@@ -236,6 +238,7 @@ def _prepare(manifest: Path, output: Path, vad) -> int:
                         "boundary_cut": cut,
                         "source_id": row["id"],
                         "vad": vad.identity,
+                        "analysis_audio_adapter_sha256": audio_identity,
                     }
                     f.write(dump(record) + "\n")
                     count += 1

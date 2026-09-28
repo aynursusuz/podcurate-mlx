@@ -7,6 +7,7 @@ from rapidfuzz.distance import Levenshtein
 
 LANGUAGES = {"en", "zh", "ja", "tr"}
 NUMERIC_METRICS = {
+    "source_sample_rate",
     "duration_s",
     "rms_dbfs",
     "peak",

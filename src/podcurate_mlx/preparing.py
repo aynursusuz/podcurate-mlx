@@ -1,5 +1,6 @@
 """Bounded episode preparation with deterministic replay of unfinished episodes."""
 
+import inspect
 import os
 import sqlite3
 import tempfile
@@ -17,6 +18,7 @@ def prepare_stream(manifest, output, vad_factory, diarizer_factory=None):
     manifest, output = manifest.resolve(strict=True), output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     database = output.with_suffix(output.suffix + ".sqlite")
+    audio_identity = sha256(Path(inspect.getfile(stream)))
     config = dump(
         {
             "manifest": str(manifest),
@@ -25,6 +27,7 @@ def prepare_stream(manifest, output, vad_factory, diarizer_factory=None):
             "timebase_hz": 16000,
             "diarization_enabled": diarizer_factory is not None,
             "implementation": sha256(Path(__file__)),
+            "audio_adapter_sha256": audio_identity,
         }
     )
     with sqlite3.connect(database) as db:
@@ -162,6 +165,7 @@ def prepare_stream(manifest, output, vad_factory, diarizer_factory=None):
                     "boundary_cut": bool(cut),
                     "vad": vad_identity,
                     "source_sha256": digest,
+                    "analysis_audio_adapter_sha256": audio_identity,
                 }
                 if diar_identity:
                     if end > diar_covered_end:

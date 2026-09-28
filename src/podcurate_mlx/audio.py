@@ -11,6 +11,16 @@ SAMPLE_RATE = 16000
 MAX_SECONDS = 30.0
 
 
+def resampling_warning(source_rate: int, target_rate: int) -> str | None:
+    """Describe conversion limits, without inventing a perceptual-quality score."""
+    if source_rate == target_rate:
+        return None
+    change = f"{source_rate} -> {target_rate} Hz"
+    if source_rate < target_rate:
+        return f"{change}: upsampling does not restore missing frequency detail."
+    return f"{change}: downsampling limits bandwidth to below {target_rate / 2:g} Hz."
+
+
 def sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -58,6 +68,8 @@ def decode(path: Path, start: float, end: float) -> np.ndarray:
             str(path),
             "-t",
             str(end - start),
+            "-map",
+            "0:a:0",
             "-vn",
             "-ac",
             "1",
@@ -102,7 +114,7 @@ def stream(path: Path, start=0.0, end=None, block_samples=16000 * 20):
     command = ["ffmpeg", "-nostdin", "-v", "error", "-ss", str(start), "-i", str(path)]
     if end is not None:
         command += ["-t", str(end - start)]
-    command += ["-vn", "-ac", "1", "-ar", "16000", "-f", "f32le", "pipe:1"]
+    command += ["-map", "0:a:0", "-vn", "-ac", "1", "-ar", "16000", "-f", "f32le", "pipe:1"]
     # Disk-backed stderr avoids a pipe deadlock without buffering an entire episode.
     with tempfile.TemporaryFile() as errors:
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=errors)
