@@ -1,0 +1,1136 @@
+{
+  "status": "passed",
+  "scope": "TRANSPORT-TEST-ONLY. Permissive bounds exercise software paths; they are not production thresholds, human quality judgments, speaker verification thresholds, or evidence of downstream training quality. FLEURS is natural read speech, not podcast-domain or synthetic-speech quality validation.",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "versions": {
+    "podcurate-mlx": "0.2.0",
+    "mlx": "0.32.2",
+    "mlx-audio": "0.5.6",
+    "mlx-whisper": "0.4.3",
+    "numpy": "2.5.3"
+  },
+  "total_seconds": 32.86006425006781,
+  "resources": {
+    "ru_maxrss_raw": 2249080832,
+    "native_unit": "bytes",
+    "peak_rss_bytes": 2249080832,
+    "scope": "process lifetime high-water mark, not a per-stage delta",
+    "mlx_peak_memory_bytes": 2483589010,
+    "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+  },
+  "phases": {
+    "asr_only": {
+      "seconds": 14.358917000005022,
+      "result": {
+        "scored": 16,
+        "resumed": 0,
+        "errors": 0
+      },
+      "ru_maxrss_raw": 1872183296,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 1872183296,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "add_remaining_stages": {
+      "seconds": 11.646547749987803,
+      "result": {
+        "scored": 16,
+        "resumed": 0,
+        "errors": 0
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "resume_all": {
+      "seconds": 2.1015783339971676,
+      "result": {
+        "scored": 0,
+        "resumed": 16,
+        "errors": 0
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "retry_isolated_fault": {
+      "seconds": 2.339467833051458,
+      "result": {
+        "injected_stage": "quality",
+        "id": "fleurs-en-1675-1",
+        "injection_is_a_test_error_not_a_model_measurement": true,
+        "result": {
+          "scored": 1,
+          "resumed": 15,
+          "errors": 0
+        },
+        "asr_results_preserved": true
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "review_sample": {
+      "seconds": 0.0022389170480892062,
+      "result": {
+        "review_records": 8,
+        "seed": "transport-test-2026-09-28",
+        "per_language_source": 2,
+        "thresholds_validated": false,
+        "sampling": "sha256(seed + NUL + id), stratified language and source kind"
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "repeat_review_sample": {
+      "seconds": 0.002105084015056491,
+      "result": {
+        "review_records": 8,
+        "seed": "transport-test-2026-09-28",
+        "per_language_source": 2,
+        "thresholds_validated": false,
+        "sampling": "sha256(seed + NUL + id), stratified language and source kind"
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "select_tts": {
+      "seconds": 0.01092170795891434,
+      "result": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "export_tts": {
+      "seconds": 0.6849623749731109,
+      "result": {
+        "train": 3,
+        "validation": 2,
+        "test": 2
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "resume_export_tts": {
+      "seconds": 0.4106103329686448,
+      "result": {
+        "train": 3,
+        "validation": 2,
+        "test": 2
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "select_asr": {
+      "seconds": 0.010518042021431029,
+      "result": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "export_asr": {
+      "seconds": 0.6756392089882866,
+      "result": {
+        "train": 3,
+        "validation": 2,
+        "test": 2
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    },
+    "resume_export_asr": {
+      "seconds": 0.4271226249402389,
+      "result": {
+        "train": 3,
+        "validation": 2,
+        "test": 2
+      },
+      "ru_maxrss_raw": 2249080832,
+      "native_unit": "bytes",
+      "peak_rss_bytes": 2249080832,
+      "scope": "process lifetime high-water mark, not a per-stage delta",
+      "mlx_peak_memory_bytes": 2483589010,
+      "mlx_memory_scope": "MLX allocator process high-water mark; excludes non-MLX allocations and is not RSS or total physical device memory"
+    }
+  },
+  "inference": {
+    "models": {
+      "alignment_qwen": {
+        "adapter_sha256": "4406343b19610eb64165b4b97072f5974bd134533063db5922bbb7cd039d1965",
+        "agreement_sha256": null,
+        "backend": "mlx-qwen3-forced-aligner",
+        "coverage_kind": "returned_reference_units",
+        "japanese_text_segmentation": {
+          "backend": "mecab_unidic_lite_viterbi",
+          "coverage_unit": "mecab_morphological_units",
+          "dictionary_sha256": "f829692e3300e8eed8461f237c6557d1c8e298fbce57133f60115b5875414db6",
+          "fugashi_version": "1.5.2",
+          "neural": false,
+          "unidic_lite_version": "1.0.8"
+        },
+        "languages": [
+          "en",
+          "zh",
+          "ja"
+        ],
+        "max_audio_seconds": 30,
+        "mlx_version": "0.32.2",
+        "model_id": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+        "package_version": "0.5.6",
+        "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+        "sample_rate": 16000,
+        "score_kind": null,
+        "timestamp_postprocessing": "mlx_audio_fix_timestamp_then_span_validation",
+        "timestamp_quantum_seconds": 0.08
+      },
+      "alignment_tr": {
+        "adapter_sha256": "4406343b19610eb64165b4b97072f5974bd134533063db5922bbb7cd039d1965",
+        "agreement_sha256": null,
+        "backend": "mlx-wav2vec2-turkish-ctc",
+        "blank_token_id": 0,
+        "conversion": "wav2vec2-fp32-v1",
+        "converted_weights_sha256": "85c718fb7aaa048d99c93aed5a78430f5ad33079600a8deb03e73c1b8cd7fe3c",
+        "coverage_kind": "aligned_normalized_reference_characters",
+        "dtype": "float32",
+        "frame_stride_samples": 320,
+        "languages": [
+          "tr"
+        ],
+        "max_audio_seconds": 30,
+        "mlx_version": "0.32.2",
+        "model_id": "m3hrdadfi/wav2vec2-large-xlsr-turkish",
+        "normalization": "nfc_turkish_case_remove_punctuation_v1",
+        "package_version": "0.5.6",
+        "receptive_field_samples": 400,
+        "revision": "8699cf317b8f9a834ddf192608324ae5bbd191f0",
+        "sample_rate": 16000,
+        "score_kind": "mean_viterbi_log_probability_including_blank"
+      },
+      "asr": {
+        "adapter_sha256": "79150081a327cf7861b5d6813df21acb71b97ecf4d8eeea53a58d36612e184b2",
+        "agreement_sha256": "ba577bc1590f468828a25c21d62b6e3e629671f1e335dc69929b8ff2e74da99b",
+        "backend": "mlx-whisper",
+        "condition_on_previous_text": false,
+        "language_mode": "forced",
+        "max_audio_seconds": 30,
+        "metric_aggregation": "duration_weighted_finite_segments",
+        "mlx_version": "0.32.2",
+        "model_id": "mlx-community/whisper-large-v3-turbo",
+        "package_version": "0.4.3",
+        "rapidfuzz_version": "3.14.6",
+        "requested_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "sample_rate": 16000,
+        "task": "transcribe",
+        "temperature": 0.0
+      },
+      "diarization": {
+        "activity_threshold": 0.5,
+        "activity_threshold_calibrated": false,
+        "adapter_sha256": "5f007d0720c2277fb183d20e6468ae1fe02c38cfc7e09ba68f26410a88c890c0",
+        "agreement_sha256": null,
+        "backend": "mlx-audio-nemotron-diarization",
+        "frame_samples": 160,
+        "max_speakers": 8,
+        "mlx_version": "0.32.2",
+        "model_id": "mlx-community/Nemotron-3-Diarization",
+        "overlap_ratio_denominator": "all_input_samples",
+        "package_version": "0.5.6",
+        "requested_revision": "59ed2dbfc1346dcea9d423c71306a3a2499c568f",
+        "resume": "replay_recording",
+        "revision": "59ed2dbfc1346dcea9d423c71306a3a2499c568f",
+        "sample_rate": 16000,
+        "speaker_identity_scope": "recording",
+        "streaming_preset": "offline"
+      },
+      "quality": {
+        "adapter_sha256": "237e67a7131d75d2bd657326d3ecef8e3acc0e77f0b10eb3e03d5bab0c75c8b9",
+        "agreement_sha256": null,
+        "dtype": "float32",
+        "file_sha256": "269fbebdb513aa23cddfbb593542ecc540284a91849ac50516870e1ac78f6edd",
+        "graph_source_sha256": "8405ce4ab22f4feaa102a97718e99dae5dbe38caac7c4e33d49a238207f99b57",
+        "graph_version": "p835-mlx-f32-v1",
+        "mlx_version": "0.32.2",
+        "provider": "MLX-Metal",
+        "source_url": "https://raw.githubusercontent.com/microsoft/DNS-Challenge/591184a9fcb2cbdec02520fed81a32bbbf9d73ff/DNSMOS/DNSMOS/sig_bak_ovr.onnx",
+        "variant": "DNSMOS-P835-nonpersonalized",
+        "weights_sha256": "16c1f1600fcf92cbc036678dda7a4d2344d20f2406db6c6941f72e8ee6f4e2b7"
+      },
+      "speaker": {
+        "adapter_sha256": "5f007d0720c2277fb183d20e6468ae1fe02c38cfc7e09ba68f26410a88c890c0",
+        "agreement_sha256": null,
+        "backend": "mlx-ecapa-voxceleb",
+        "consistency": "mean_adjacent_3s_windows_min_1s_remainder_or_halves_if_2_to_4s",
+        "cosine_is_probability": false,
+        "embedding_dimension": 192,
+        "frontend": "speechbrain_fbank_numpy_80mel_400fft_160hop",
+        "max_audio_seconds": 30,
+        "mlx_version": "0.32.2",
+        "model_id": "aufklarer/SpeechBrain-ECAPA-VoxCeleb-20M-MLX",
+        "numpy_version": "2.5.3",
+        "requested_revision": "e749e6e08557f4a3ceb6ce3bf6f0b79efe592a77",
+        "revision": "e749e6e08557f4a3ceb6ce3bf6f0b79efe592a77",
+        "sample_rate": 16000,
+        "source_revision": "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286",
+        "status_semantics": "metric_availability",
+        "vendored_source_revision": "e749e6e08557f4a3ceb6ce3bf6f0b79efe592a77",
+        "vendored_source_sha256": {
+          "ecapa_frontend.py": "150471b0ac7252ee475b3cfea84be230a5746ecc6cde098e4fb120a4c2c4e0ac",
+          "ecapa_model.py": "317ef0bd4515030cfbd2130e67a98d2935009be63dd039c910581c94f7734f32"
+        },
+        "weights_sha256": "76ea14d750a69f900c1545d586f8069f1805c38e7226a2eebf4c90b4dd5804c3"
+      }
+    },
+    "stages": {
+      "alignment_qwen": {
+        "ok": 12,
+        "error": 0,
+        "inference_seconds": 1.9108840010594577
+      },
+      "alignment_tr": {
+        "ok": 4,
+        "error": 0,
+        "inference_seconds": 0.6610902500106022
+      },
+      "asr": {
+        "ok": 16,
+        "error": 0,
+        "inference_seconds": 11.508882789989002
+      },
+      "diarization": {
+        "ok": 16,
+        "error": 0,
+        "inference_seconds": 0.8709631231613457
+      },
+      "quality": {
+        "ok": 16,
+        "error": 0,
+        "inference_seconds": 1.3764488749438897
+      },
+      "speaker": {
+        "ok": 16,
+        "error": 0,
+        "inference_seconds": 1.638628879794851
+      }
+    },
+    "records": [
+      {
+        "id": "fleurs-en-1904-0",
+        "language": "en",
+        "error": null,
+        "reference_cer": 0.037037037037037035,
+        "reference_wer": 0.10526315789473684,
+        "dnsmos_sig": 3.1943863043172347,
+        "dnsmos_bak": 3.7857610416918694,
+        "dnsmos_ovrl": 2.649609774504701,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 1.0,
+        "speaker_consistency": 0.4307353464714107,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.8421052631578947,
+        "alignment_score": null,
+        "reference_control": "same_audio_positive_control"
+      },
+      {
+        "id": "fleurs-en-1675-1",
+        "language": "en",
+        "error": null,
+        "reference_cer": 0.03409090909090909,
+        "reference_wer": 0.09523809523809523,
+        "dnsmos_sig": 3.573646261175111,
+        "dnsmos_bak": 2.9936323156461726,
+        "dnsmos_ovrl": 2.7296433278676715,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 0.04183560577015896,
+        "speaker_consistency": 0.6904279457946635,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9047619047619048,
+        "alignment_score": null,
+        "reference_control": "different_file_no_speaker_label"
+      },
+      {
+        "id": "fleurs-en-1950-2",
+        "language": "en",
+        "error": null,
+        "reference_cer": 0.025974025974025976,
+        "reference_wer": 0.06060606060606061,
+        "dnsmos_sig": 2.5224031035780117,
+        "dnsmos_bak": 3.8568362376533623,
+        "dnsmos_ovrl": 2.043339889920397,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.6677684470705979,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9393939393939394,
+        "alignment_score": null,
+        "reference_control": null
+      },
+      {
+        "id": "fleurs-en-1728-3",
+        "language": "en",
+        "error": null,
+        "reference_cer": 0.02666666666666667,
+        "reference_wer": 0.06666666666666667,
+        "dnsmos_sig": 2.505962292703231,
+        "dnsmos_bak": 3.9129827375044544,
+        "dnsmos_ovrl": 1.9631810145904385,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.5918377552989884,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9333333333333333,
+        "alignment_score": null,
+        "reference_control": null
+      },
+      {
+        "id": "fleurs-zh-1906-0",
+        "language": "zh",
+        "error": null,
+        "reference_cer": 0.0,
+        "reference_wer": null,
+        "dnsmos_sig": 3.4371806754875283,
+        "dnsmos_bak": 4.177012319337825,
+        "dnsmos_ovrl": 3.158087315894658,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 1.0,
+        "speaker_consistency": 0.40924795449764795,
+        "speaker_status": "ok",
+        "alignment_status": "ok",
+        "alignment_reasons": [],
+        "alignment_coverage": 1.0,
+        "alignment_score": null,
+        "reference_control": "same_audio_positive_control"
+      },
+      {
+        "id": "fleurs-zh-2006-1",
+        "language": "zh",
+        "error": null,
+        "reference_cer": 0.047619047619047616,
+        "reference_wer": null,
+        "dnsmos_sig": 3.3580882833914365,
+        "dnsmos_bak": 4.191917507943056,
+        "dnsmos_ovrl": 3.0702130949110495,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 0.20996737472941907,
+        "speaker_consistency": 0.5937824336106461,
+        "speaker_status": "ok",
+        "alignment_status": "ok",
+        "alignment_reasons": [],
+        "alignment_coverage": 1.0,
+        "alignment_score": null,
+        "reference_control": "different_file_no_speaker_label"
+      },
+      {
+        "id": "fleurs-zh-1883-2",
+        "language": "zh",
+        "error": null,
+        "reference_cer": 0.02702702702702703,
+        "reference_wer": null,
+        "dnsmos_sig": 3.5400867927106536,
+        "dnsmos_bak": 3.9361931182923438,
+        "dnsmos_ovrl": 3.196126697989633,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.39226167887691993,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9333333333333333,
+        "alignment_score": null,
+        "reference_control": null
+      },
+      {
+        "id": "fleurs-zh-1852-3",
+        "language": "zh",
+        "error": null,
+        "reference_cer": 0.0963855421686747,
+        "reference_wer": null,
+        "dnsmos_sig": 3.6073694787323713,
+        "dnsmos_bak": 3.798070240112685,
+        "dnsmos_ovrl": 3.1699599680701565,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.7041691195633845,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9866666666666667,
+        "alignment_score": null,
+        "reference_control": null
+      },
+      {
+        "id": "fleurs-ja-1828-0",
+        "language": "ja",
+        "error": null,
+        "reference_cer": 0.0,
+        "reference_wer": null,
+        "dnsmos_sig": 3.302359395991584,
+        "dnsmos_bak": 1.9337522008836856,
+        "dnsmos_ovrl": 2.03005279181899,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 1.0,
+        "speaker_consistency": 0.41440128644527996,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9545454545454546,
+        "alignment_score": null,
+        "reference_control": "same_audio_positive_control"
+      },
+      {
+        "id": "fleurs-ja-1834-1",
+        "language": "ja",
+        "error": null,
+        "reference_cer": 0.0,
+        "reference_wer": null,
+        "dnsmos_sig": 3.568788857769006,
+        "dnsmos_bak": 3.612563704807081,
+        "dnsmos_ovrl": 3.0969024730143744,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 0.7855892463106102,
+        "speaker_consistency": 0.3464289503248602,
+        "speaker_status": "ok",
+        "alignment_status": "ok",
+        "alignment_reasons": [],
+        "alignment_coverage": 1.0,
+        "alignment_score": null,
+        "reference_control": "different_file_no_speaker_label"
+      },
+      {
+        "id": "fleurs-ja-1813-2",
+        "language": "ja",
+        "error": null,
+        "reference_cer": 0.09859154929577464,
+        "reference_wer": null,
+        "dnsmos_sig": 3.622474502557408,
+        "dnsmos_bak": 3.9473424944769104,
+        "dnsmos_ovrl": 3.2822555879144026,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.6402547212588899,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9722222222222222,
+        "alignment_score": null,
+        "reference_control": null
+      },
+      {
+        "id": "fleurs-ja-1869-3",
+        "language": "ja",
+        "error": null,
+        "reference_cer": 0.16071428571428573,
+        "reference_wer": null,
+        "dnsmos_sig": 3.632450792031928,
+        "dnsmos_bak": 3.985826901251489,
+        "dnsmos_ovrl": 3.3120240454736014,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.6567481059976952,
+        "speaker_status": "ok",
+        "alignment_status": "review",
+        "alignment_reasons": [
+          "invalid_alignment_timestamp",
+          "reference_units_not_fully_aligned"
+        ],
+        "alignment_coverage": 0.9714285714285714,
+        "alignment_score": null,
+        "reference_control": null
+      },
+      {
+        "id": "fleurs-tr-2004-0",
+        "language": "tr",
+        "error": null,
+        "reference_cer": 0.09574468085106383,
+        "reference_wer": 0.19047619047619047,
+        "dnsmos_sig": 3.5749349176475285,
+        "dnsmos_bak": 3.9223453544615325,
+        "dnsmos_ovrl": 3.2047146975269163,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 1.0,
+        "speaker_consistency": 0.3970205660002142,
+        "speaker_status": "ok",
+        "alignment_status": "ok",
+        "alignment_reasons": [],
+        "alignment_coverage": 1.0,
+        "alignment_score": -0.06636758745626735,
+        "reference_control": "same_audio_positive_control"
+      },
+      {
+        "id": "fleurs-tr-1660-1",
+        "language": "tr",
+        "error": null,
+        "reference_cer": 0.031578947368421054,
+        "reference_wer": 0.07142857142857142,
+        "dnsmos_sig": 3.517381032102301,
+        "dnsmos_bak": 4.050631544008884,
+        "dnsmos_ovrl": 3.2095448959153425,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": 0.16396352376407736,
+        "speaker_consistency": 0.4132898408563126,
+        "speaker_status": "ok",
+        "alignment_status": "ok",
+        "alignment_reasons": [],
+        "alignment_coverage": 1.0,
+        "alignment_score": -0.29745131849920264,
+        "reference_control": "different_file_no_speaker_label"
+      },
+      {
+        "id": "fleurs-tr-1692-2",
+        "language": "tr",
+        "error": null,
+        "reference_cer": 0.05555555555555555,
+        "reference_wer": 0.25,
+        "dnsmos_sig": 3.4179798209067123,
+        "dnsmos_bak": 3.6721652514192775,
+        "dnsmos_ovrl": 2.9404622733494676,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.3692717640731919,
+        "speaker_status": "ok",
+        "alignment_status": "ok",
+        "alignment_reasons": [],
+        "alignment_coverage": 1.0,
+        "alignment_score": -0.09196982977436784,
+        "reference_control": null
+      },
+      {
+        "id": "fleurs-tr-1711-3",
+        "language": "tr",
+        "error": null,
+        "reference_cer": 0.0,
+        "reference_wer": 0.0,
+        "dnsmos_sig": 3.46176715036576,
+        "dnsmos_bak": 3.742216137728652,
+        "dnsmos_ovrl": 3.0145952743601856,
+        "diar_speakers": 1,
+        "overlap_ratio": 0.0,
+        "speaker_similarity": null,
+        "speaker_consistency": 0.5423897629185264,
+        "speaker_status": "ok",
+        "alignment_status": "ok",
+        "alignment_reasons": [],
+        "alignment_coverage": 1.0,
+        "alignment_score": -0.0707092035266053,
+        "reference_control": null
+      }
+    ]
+  },
+  "selections": {
+    "tts": {
+      "counts": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "exports": {
+        "train": 3,
+        "validation": 2,
+        "test": 2
+      },
+      "sample_rate": 24000,
+      "export_file_hashes": {
+        "test/272f915bd9b8e667c1534c3ba0402438bd9cc1288e775ad43588fac1ed67e320.flac": "a20d52a1714ffa5a4481d575b0297b886148c2552b1e21bf75296e213202fab9",
+        "test/780cb414f2d69ff739339d25a4d6454794eb4e1dd8f06d49fedf00994970f1a3.flac": "8adc6f4d612551a1ee6f09e04ecadcd13fba0ed03774880144971d8f04f81be5",
+        "train/21caf37e6b44f3bd00db4e04a623b0623a9411ef3a5255982b8c102881351fb2.flac": "32d9cf89cf1585c49d5ede031f381b00f707731360de8282404c8f568211cdde",
+        "train/2ea385c4fe54a5509a338cedd78994e14f64d2136108f8ead4581cc2c216e2cb.flac": "599016279dd3bcb6466e5cf918d5ad9a782d40f02a27435232c5e0ed70bfa3e5",
+        "train/aaa7b6e0b8a5196dec5709ffae2cb34c40b9760ea5cac9664e376e04a26d8e21.flac": "94635c9d50259da7fc0221e7ff30e3ca989773b32129dbcafce631d575842bac",
+        "validation/246da9111f3e2423a8790fc41b9bbef18db15a0b77d783ad32adccadbc2833ca.flac": "36a44e50d81d5019294130f48f5f70707d6f4ae9f11bb30605ca5c0a018d7a7e",
+        "validation/2cb687ebc67c9c8e43a1ed434b0b9e45cd595a14241470c1001160f899a625e9.flac": "13ac6186c6c557160d4a1bf7cc0b21de8c58af78dce59f864d0737e25ed89290",
+        "metadata.jsonl": "b7bb359f9cda53208a875d15125339860064580d467fa7cb5d858421ee42e5df"
+      },
+      "export_resume_bytes_unchanged": true,
+      "flac_transport_exercised": true,
+      "decisions": [
+        {
+          "id": "fleurs-en-1904-0",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-en-1675-1",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-en-1950-2",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-en-1728-3",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-zh-1906-0",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-zh-2006-1",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-zh-1883-2",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-zh-1852-3",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-ja-1828-0",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-ja-1834-1",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-ja-1813-2",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-ja-1869-3",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-tr-2004-0",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-tr-1660-1",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-tr-1692-2",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-tr-1711-3",
+          "status": "accept",
+          "reasons": []
+        }
+      ]
+    },
+    "asr": {
+      "counts": {
+        "accept": 7,
+        "reject": 0,
+        "review": 9,
+        "error": 0
+      },
+      "exports": {
+        "train": 3,
+        "validation": 2,
+        "test": 2
+      },
+      "sample_rate": 24000,
+      "export_file_hashes": {
+        "test/272f915bd9b8e667c1534c3ba0402438bd9cc1288e775ad43588fac1ed67e320.flac": "a20d52a1714ffa5a4481d575b0297b886148c2552b1e21bf75296e213202fab9",
+        "test/780cb414f2d69ff739339d25a4d6454794eb4e1dd8f06d49fedf00994970f1a3.flac": "8adc6f4d612551a1ee6f09e04ecadcd13fba0ed03774880144971d8f04f81be5",
+        "train/21caf37e6b44f3bd00db4e04a623b0623a9411ef3a5255982b8c102881351fb2.flac": "32d9cf89cf1585c49d5ede031f381b00f707731360de8282404c8f568211cdde",
+        "train/2ea385c4fe54a5509a338cedd78994e14f64d2136108f8ead4581cc2c216e2cb.flac": "599016279dd3bcb6466e5cf918d5ad9a782d40f02a27435232c5e0ed70bfa3e5",
+        "train/aaa7b6e0b8a5196dec5709ffae2cb34c40b9760ea5cac9664e376e04a26d8e21.flac": "94635c9d50259da7fc0221e7ff30e3ca989773b32129dbcafce631d575842bac",
+        "validation/246da9111f3e2423a8790fc41b9bbef18db15a0b77d783ad32adccadbc2833ca.flac": "36a44e50d81d5019294130f48f5f70707d6f4ae9f11bb30605ca5c0a018d7a7e",
+        "validation/2cb687ebc67c9c8e43a1ed434b0b9e45cd595a14241470c1001160f899a625e9.flac": "13ac6186c6c557160d4a1bf7cc0b21de8c58af78dce59f864d0737e25ed89290",
+        "metadata.jsonl": "b7bb359f9cda53208a875d15125339860064580d467fa7cb5d858421ee42e5df"
+      },
+      "export_resume_bytes_unchanged": true,
+      "flac_transport_exercised": true,
+      "decisions": [
+        {
+          "id": "fleurs-en-1904-0",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-en-1675-1",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-en-1950-2",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-en-1728-3",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-zh-1906-0",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-zh-2006-1",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-zh-1883-2",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-zh-1852-3",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-ja-1828-0",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-ja-1834-1",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-ja-1813-2",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-ja-1869-3",
+          "status": "review",
+          "reasons": [
+            "alignment_requires_review"
+          ]
+        },
+        {
+          "id": "fleurs-tr-2004-0",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-tr-1660-1",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-tr-1692-2",
+          "status": "accept",
+          "reasons": []
+        },
+        {
+          "id": "fleurs-tr-1711-3",
+          "status": "accept",
+          "reasons": []
+        }
+      ]
+    }
+  },
+  "hardware": {
+    "chip": "Apple M4 Pro",
+    "cpu_cores": 14,
+    "unified_memory_bytes": 25769803776
+  },
+  "audio_seconds": 188.76,
+  "fixtures": [
+    {
+      "id": "fleurs-en-1904-0",
+      "language": "en",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "1003119935936341070.wav",
+      "sha256": "33aca50159ec2e3cbcc894eb26faa916d6badb1b49fb75994973561540a7f012",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/en_us/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-en-1675-1",
+      "language": "en",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10052240106321793346.wav",
+      "sha256": "7603cae3294309ef70d234180cefccc3b13865ee525262228a636069b9b62841",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/en_us/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-en-1950-2",
+      "language": "en",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10167324587744183095.wav",
+      "sha256": "260bdd1a15e1d35bcc5d91667516ca3bc659285e10f94872182715bcd7880398",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/en_us/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-en-1728-3",
+      "language": "en",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10197164397713068203.wav",
+      "sha256": "b174be7730f0aab6a26762130b66f2125392b50550645727bd057d8479fb6219",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/en_us/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-zh-1906-0",
+      "language": "zh",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10026684690566417990.wav",
+      "sha256": "a72c0b59fdba80850552af7991de07f9f4940846d2d70f0890eeb153c40f164b",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/cmn_hans_cn/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-zh-2006-1",
+      "language": "zh",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10040380210557600780.wav",
+      "sha256": "b39d2c84aefada280b73a9ab439726d370d45e5a75bd05f0a90153288ea4561b",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/cmn_hans_cn/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-zh-1883-2",
+      "language": "zh",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10048525650290665384.wav",
+      "sha256": "aeb95366f4907daf8797d66797c87f6e002f10704e78e87a0c4b4521756a1616",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/cmn_hans_cn/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-zh-1852-3",
+      "language": "zh",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10053956375630517392.wav",
+      "sha256": "d1274fd5e5ce0029473faa0df42bd714094428b853029d6f6c64ffd3f36a8afe",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/cmn_hans_cn/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-ja-1828-0",
+      "language": "ja",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10020345318418093976.wav",
+      "sha256": "bd1b9533cfa176b8c2a71ecb4821a02bc86fa368d096373efe8d8dceafb35634",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/ja_jp/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-ja-1834-1",
+      "language": "ja",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10086073819084529371.wav",
+      "sha256": "fa4d3ce475c9b2fd127d3c9a6ea445792e21f04c5f8514452b0ad97b0ccbc2f8",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/ja_jp/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-ja-1813-2",
+      "language": "ja",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10112379500600537933.wav",
+      "sha256": "ade60c57813d704095310734906a9b6918b2dbbdcd0c9405c3f7d25580570d48",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/ja_jp/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-ja-1869-3",
+      "language": "ja",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10174984673310355687.wav",
+      "sha256": "7059c2e63434b2ffb6d33782ba99bf31b2c3f725feb988d50c514adda8efdb64",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/ja_jp/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-tr-2004-0",
+      "language": "tr",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10000377651956138413.wav",
+      "sha256": "e2efd9f3ce2fcc9e191126dcded8e674233a9ce83a9c2132541700e8f1bd57c3",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/tr_tr/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-tr-1660-1",
+      "language": "tr",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10002518854052673247.wav",
+      "sha256": "8d49d9d174794b25da72852685120ff5dd1d7319ca629256fafd1e25c635fc9a",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/tr_tr/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-tr-1692-2",
+      "language": "tr",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10067972835475076305.wav",
+      "sha256": "0d35468a6dec8161711e470404f64471ceed7d7197adcd2e7638a4fc3182620d",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/tr_tr/audio/test.tar.gz"
+    },
+    {
+      "id": "fleurs-tr-1711-3",
+      "language": "tr",
+      "dataset": "google/fleurs",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "license": "CC-BY-4.0",
+      "original_name": "10073710776711594036.wav",
+      "sha256": "71c90819a4b8f5c5ade78626e921d7efe27fa087cf1e17581d1242a6f26ca5de",
+      "source_url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/data/tr_tr/audio/test.tar.gz"
+    }
+  ]
+}

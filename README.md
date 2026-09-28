@@ -1,150 +1,109 @@
 # podcurate-mlx
 
-Local speech-data scoring and filtering on Apple Silicon. Small Python CLI, MLX Whisper,
-JSONL inputs, resumable SQLite scores, explicit selection policies.
-
-Works with **podcast segments and synthetic speech** labeled `en`, `zh`, `ja`, or `tr`.
-These are supported input languages, **not a claim of validated quality in all four languages**.
-This first release is a filtering core, not a complete raw-podcast-to-TTS corpus pipeline.
+Local podcast and synthetic-speech curation on Apple Silicon: **prepare → score → calibrate → select → export**. English, Mandarin Chinese, Japanese and Turkish. Default neural inference runs on **MLX**, one model at a time; FFmpeg, SQLite and numerical processing run on CPU.
 
 ## Install
 
-Native Apple Silicon Python 3.11+ and FFmpeg are required for MLX inference.
+Native Apple Silicon, Python 3.12 and FFmpeg. Model downloads happen on first use. Source audio is never overwritten.
 
 ```bash
-brew install ffmpeg
+brew install ffmpeg uv
 git clone https://github.com/aynursusuz/podcurate-mlx.git
 cd podcurate-mlx
-python3 -m venv .venv
+uv sync --locked --python 3.12 --extra all --extra dev
 source .venv/bin/activate
-pip install -e '.[mlx]'
 ```
 
-Whisper inference uses MLX. Upstream `mlx-whisper` also declares PyTorch as a dependency;
-installation is not PyTorch-free. Optional VAD uses the community `mlx-audio` MLX port.
-Optional DNSMOS uses **ONNX Runtime on CPU**, not MLX.
+`uv.lock` fixes Python dependencies; model commits and conversion hashes are recorded in each run. PyTorch is installed for the initial Turkish checkpoint conversion and upstream packaging; default acoustic inference uses MLX. Original-framework comparisons are separate development checks.
 
-## 1. Prepare an input manifest
+## Input
 
-One JSON object per line. Paths resolve relative to the manifest. IDs must be unique.
-Use an ISO Whisper language code: `en`, `zh`, `ja`, `tr`.
+One JSON object per line; paths resolve relative to the manifest. Each scored interval is at most 30 seconds. Supported language codes: `en`, `zh`, `ja`, `tr`.
 
 ```json
-{"id":"generated-1","audio":"audio/1.wav","kind":"synthetic","language":"tr","reference_text":"Bugün hava çok güzel."}
-{"id":"podcast-1","audio":"episodes/1.mp3","kind":"podcast","language":"en","start":12.3,"end":25.1}
+{"id":"generated-1","audio":"audio/1.wav","language":"tr","kind":"synthetic","reference_text":"Bugün hava çok güzel.","source_id":"generation-batch-1","speaker_id":"known-voice-1","reference_audio":"references/voice-1.wav"}
+{"id":"episode-1","audio":"episodes/1.mp3","language":"en","kind":"podcast","source_id":"episode-1"}
 ```
 
-Synthetic clips require the text given to the generator. Each scoring span must be at most
-30 seconds. Audio is read into an unnormalized 16 kHz mono analysis view; original files
-are never modified. Preserve generator/prompt/speaker/source information as extra input
-fields: it is carried through to the audit output.
+Synthetic speech requires the text supplied to the generator. `speaker_id` and `reference_audio` are optional. A reference longer than 30 seconds uses its first 30 seconds; `reference_start` / `reference_end` can select another bounded interval. References should contain the intended speaker.
 
-Long, untranscribed podcasts can use optional VAD proposals:
+Prepared intervals have integer `start_sample`, `end_sample` and `timebase_hz`; seconds-based `start` / `end` remain supported. Known speaker IDs must mean the same person across files. Episode-local diarization labels are never treated as global speaker IDs.
+
+## Commands
+
+Prepare long, untranscribed podcast episodes (omit reference text):
 
 ```bash
-pip install -e '.[vad]'
-podcurate-mlx prepare episodes.jsonl --out segments.jsonl \
-  --revision 7bc17f22d3c0451bd3a6cd71e759b009271ff49a
+podcurate-mlx prepare episodes.jsonl --out segments.jsonl
 ```
 
-The episode manifest has `id`, `audio`, and `language`, without `reference_text`.
-Prepare runs VAD in bounded 30-second blocks. Segments touching an internal block edge
-are marked `boundary_cut` and always go to review during selection. VAD does **not**
-identify speakers or remove overlapping speech. This command proposes intervals;
-it does not certify TTS training examples.
+FFmpeg reads bounded blocks. Silero recurrent state and Nemotron speaker state persist across blocks. Forced 30-second cuts receive `boundary_cut` and require review. A sidecar SQLite database retains completed episodes; rerun the same command to replay an unfinished episode from its start and publish deterministic intervals. Preserve this sidecar for resume.
 
-## 2. Score with MLX
+Score prepared podcast segments or already short synthetic clips:
 
 ```bash
-podcurate-mlx score segments.jsonl --out runs/podcast.sqlite \
-  --revision a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb
+podcurate-mlx score segments.jsonl --out runs/scores.sqlite
+# Same command resumes; only failed stages are retried with this flag:
+podcurate-mlx score segments.jsonl --out runs/scores.sqlite --retry-errors
 ```
 
-Default model: `mlx-community/whisper-large-v3-turbo`. The commit above pins its weights.
-The first invocation downloads them. Use `--offline` once cached. To use another model,
-pass both `--model` and its `--revision`. Without a commit, `main` is resolved and its
-actual commit is recorded; a changed commit requires a new run database.
+The default stages are MLX Whisper ASR, native MLX DNSMOS, Nemotron diarization/overlap, ECAPA speaker metrics, Qwen alignment for en/zh/ja and MLX Turkish Wav2Vec2 CTC alignment. They run sequentially. Successful results commit per stage and record. `--stages asr,quality` can start a partial run; adding other stages later reuses successful ASR. Partial runs cannot pass a profile requiring missing stages. Source, manifest or existing stage identity changes require a fresh database. Use one writer per database. Version 0.1 databases remain intact; start a fresh database for 0.2.
 
-Run the same command to resume. Completed records are committed individually. Manifest,
-model, code, FFmpeg/dependency version, or source-content/location changes are refused for that run.
-Keep source files unchanged while a command is running. One model
-process handles one bounded segment at a time. SQLite stores corpus-wide results on disk.
-
-Scores include duration, level, full-scale sample ratio, transcript, decoder diagnostics,
-and exact decoded-PCM hash. With reference text, they include **CER for all four languages**
-and **space-delimited WER for English/Turkish**. CER/WER are ASR agreement proxies.
-Numbers are not expanded, Chinese scripts are not converted, and Japanese readings are
-not normalized: inspect these effects when calibrating. Language is supplied, not detected.
-
-Optional acoustic quality:
+Create a repeatable human-review sample stratified by language and podcast/synthetic source:
 
 ```bash
-pip install -e '.[quality]'
-podcurate-mlx score segments.jsonl --out runs/quality.sqlite \
-  --revision a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb \
-  --dnsmos-model models/sig_bak_ovr.onnx
+podcurate-mlx calibrate runs/scores.sqlite --out review --per-group 20 --seed 42
 ```
 
-Supply the **non-personalized** model from the
-[Microsoft DNSMOS reference directory](https://github.com/microsoft/DNS-Challenge/tree/master/DNSMOS/DNSMOS).
-Its SHA-256 is saved. DNSMOS predicts perceptual scores; it does not establish transcript
-correctness, speaker identity, or naturalness for every language and synthesis system.
-
-## 3. Select using measured thresholds
-
-No universal quality thresholds are supplied. First score and listen to a stratified
-sample from each language, source, and generator. Choose thresholds from that review.
-Policy shape (replace the placeholders with finite numbers):
+Listen to the source intervals in `review/review.jsonl`, set `human_label` to `accept` or `reject`, and retain IDs, hashes and input metadata. Choose separate bounds for each language/source/profile. No universal quality cutoffs are supplied. Policy shape (placeholders must be replaced with finite numbers):
 
 ```text
-{"languages":{"tr":{"reference_cer":{"max":YOUR_MEASURED_LIMIT},
-                     "dnsmos_ovrl":{"min":YOUR_MEASURED_LIMIT}}}}
+{"profiles":{"tts":{"languages":{"tr":{"synthetic":{
+  "reference_cer":{"max":YOUR_LIMIT},
+  "overlap_ratio":{"max":YOUR_LIMIT},
+  "speaker_consistency":{"min":YOUR_LIMIT},
+  "speaker_similarity":{"min":YOUR_LIMIT},
+  "dnsmos_ovrl":{"min":YOUR_LIMIT}
+}}}},"asr":{"languages":{"tr":{"synthetic":{
+  "reference_cer":{"max":YOUR_LIMIT}
+}}}}}}
 ```
 
-For a syntax-only run, `examples/policy.smoke.json` checks positive duration. It is **not
-a quality filter**. Never treat its output as curated training data.
+For podcasts without reference text, include `avg_logprob` and `compression_ratio` bounds. ASR agreement and decoder scores remain proxies; they cannot establish that an untranscribed podcast is correct. CER works across the four languages; space-delimited WER is provided only for en/tr. Digits/readings/scripts are not silently normalized into guessed words.
+
+Evaluate chosen policies against human labels, then select independently:
 
 ```bash
-podcurate-mlx select runs/quality.sqlite --policy policy.json --out runs/selection-v1
+podcurate-mlx calibrate runs/scores.sqlite --out evaluated \
+  --labels review/review.jsonl --policy policy.json --profile tts
+podcurate-mlx select runs/scores.sqlite --policy policy.json --profile tts --out selected-tts
+podcurate-mlx select runs/scores.sqlite --policy policy.json --profile asr --out selected-asr
 ```
 
-Outputs:
+TTS requires one detected speaker, structurally valid alignment, intact boundaries, acoustic and speaker measurements, and explicit bounds. Reference similarity applies only when a reference exists; without one, consistency does not prove target identity. ASR checks text/alignment; noise and speaker changes alone are not rejection rules. Missing required measurements produce review/error, never acceptance. Exact decoded-PCM duplicates are removed only among otherwise accepted records.
 
-- `accepted.jsonl`: records passing the specified policy, with source paths and spans.
-- `decisions.jsonl`: every record, scores, and `accept` / `reject` / `review` / `error` reasons.
-- `summary.json`: counts, the exact policy, and model/runtime identity.
-- `_SUCCESS`: selection completed; `_FAILED` marks an incomplete selection.
-
-Missing requested metrics and uncalibrated languages go to review. Silent audio and empty
-transcripts are rejected, except that cut-boundary candidates go to review first.
-Unavailable or changed source files produce errors at selection. Exact decoded-PCM
-duplicates among otherwise accepted records
-keep the first manifest entry. Similar text alone never causes removal. Selection requires
-a fully completed scoring pass. No source audio is deleted or copied.
-The CLI returns a nonzero exit status if scoring/selection contains errors. To retry error
-records after correcting the input or environment, start a new database.
-
-## Scope and evidence
-
-Implemented: bounded audio reads, optional MLX VAD, MLX ASR, reference-text agreement,
-optional CPU DNSMOS, disk-backed audit/resume, exact PCM deduplication, separate per-language
-policies. No throughput or downstream training-quality improvement is claimed.
-
-Still needed for a complete TTS corpus: speaker diarization/overlap detection, independent
-alignment and boundary checking, speaker-reference consistency, music/separation assessment,
-cross-episode identity and train/test leakage checks. Reference-free podcast ASR can be wrong
-even with high confidence. Review rejected samples as well as accepted ones.
-
-[Research and limitations (Türkçe)](docs/research.md) · [Runtime notes](docs/runtime.md)
-
-## Development
+Export actual, reopened-and-verified FLAC files and portable JSONL metadata:
 
 ```bash
-pip install -e '.[dev]'
+podcurate-mlx export selected-tts --out corpus-tts --sample-rate 24000 --seed 42
+podcurate-mlx export selected-asr --out corpus-asr --sample-rate preserve --seed 42
+```
+
+The training sample rate is explicit: a 16 kHz analysis copy never silently becomes training audio. Default split fractions are 90%/5%/5%, configurable with `--train` / `--validation`; small grouped corpora need not approximate these fractions. Shared sources, known speakers, reference sources and exact PCM copies are transitively grouped before splitting. **Unknown speakers have no speaker-disjoint guarantee.** Export can resume, and refuses changed source or completed output files.
+
+## Evidence and limits
+
+- [Research and source mapping](docs/research.md)
+- [DNSMOS numerical equivalence](docs/dnsmos-validation.md)
+- [ECAPA and diarization validation](docs/speaker-validation.md)
+- [Alignment validation](docs/alignment-validation.md)
+- [End-to-end checks](docs/validation.md)
+
+Numerical parity is separate from quality calibration. FLEURS checks exercise real speech in the four languages; they do not measure performance on the user's podcasts or speech generators. Nemotron has eight recording-local speaker channels and can miss low-level overlapping speech. Qwen does not provide an alignment confidence score; none is invented. Turkish does not use Qwen's unsupported language path.
+
+```bash
 pytest -q
-ruff check src tests
+ruff check src tests scripts
 ```
 
-Unit tests use model mocks. Model inference verification and its limits are recorded in
-[validation](docs/validation.md). Library tests can run without MLX; actual inference needs
-a supported MLX runtime. The code is MIT-licensed; upstream models retain their own terms.
+Ordinary CI uses deterministic fixtures and model mocks, without GPU downloads. Opt-in real-model checks and measured hardware results are documented separately. Project code is MIT; models, vendored code and datasets retain their [upstream terms](docs/third-party.md).

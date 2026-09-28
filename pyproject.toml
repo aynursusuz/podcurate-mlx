@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "podcurate-mlx"
-version = "0.1.0"
-description = "Local, auditable speech-data filtering with MLX Whisper."
+version = "0.2.0"
+description = "Local, auditable speech-data filtering with native MLX inference."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -14,7 +14,12 @@ dependencies = ["numpy>=1.26", "rapidfuzz>=3.6", "huggingface-hub>=0.34"]
 [project.optional-dependencies]
 mlx = ["mlx-whisper==0.4.3"]
 vad = ["mlx-audio==0.5.6"]
-quality = ["onnxruntime>=1.18"]
+quality = ["mlx==0.32.2", "onnx==1.23.0"]
+alignment = ["fugashi==1.5.2", "unidic-lite==1.0.8", "mlx-audio==0.5.6", "safetensors>=0.6", "torch==2.14.0"]
+speakers = ["mlx-audio==0.5.6", "safetensors>=0.6"]
+all = ["fugashi==1.5.2", "unidic-lite==1.0.8", "mlx==0.32.2", "mlx-whisper==0.4.3", "mlx-audio==0.5.6", "onnx==1.23.0",
+       "safetensors>=0.6", "torch==2.14.0"]
+reference = ["onnxruntime==1.30.0", "transformers==5.17.0", "torch==2.14.0"]
 dev = ["pytest>=8", "ruff>=0.9"]
 
 [project.scripts]

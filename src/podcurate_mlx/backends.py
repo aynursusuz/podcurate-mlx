@@ -161,12 +161,21 @@ class WhisperASR:
             "compression_ratio": _segment_mean(segments, "compression_ratio"),
         }
 
+    def close(self):
+        import gc
+
+        module = importlib.import_module("mlx_whisper.transcribe")
+        module.ModelHolder.model = None
+        module.ModelHolder.model_path = None
+        gc.collect()
+        _optional_module("mlx.core", "mlx").clear_cache()
+
 
 class SileroVAD:
     """Optional community MLX Silero port for bounded audio segments.
 
-    This is not a long-file streaming decoder. Callers must decode bounded
-    windows and handle their offsets/boundaries explicitly.
+    stream() retains recurrent state and unfinished speech across decoder blocks.
+    Thirty-second forced cuts are explicitly marked for review.
     """
 
     def __init__(self, model_id: str, revision: str, local_files_only: bool = False):
@@ -182,6 +191,7 @@ class SileroVAD:
             "mlx_version": _package_version("mlx"),
             "sample_rate": SAMPLE_RATE,
             "max_audio_seconds": 30,
+            "stream_algorithm": "stateful-512-v1",
         }
 
     def __call__(self, audio_16k: np.ndarray) -> list[tuple[float, float]]:
@@ -200,3 +210,59 @@ class SileroVAD:
                 raise RuntimeError("VAD returned a timestamp outside the input segment")
             output.append((start, min(end, duration)))
         return output
+
+    def stream(self, blocks):
+        """Yield (start_sample, end_sample, forced_cut); offsets relative to stream start.
+
+        Threshold/padding are segmentation settings, not calibrated quality limits.
+        The state machine consumes exactly 512 samples, independent of IO block size.
+        """
+        state = None
+        pending = np.empty(0, np.float32)
+        position = total = 0
+        speech_start = silence_start = None
+        continuation = False
+        threshold = float(self._model.config.threshold)
+        min_speech = round(self._model.config.min_speech_duration_ms * 16)
+        min_silence = round(self._model.config.min_silence_duration_ms * 16)
+        pad = round(self._model.config.speech_pad_ms * 16)
+
+        def windows():
+            nonlocal pending, total
+            for block in blocks:
+                total += len(block)
+                pending = np.concatenate((pending, block))
+                while len(pending) >= 512:
+                    yield pending[:512]
+                    pending = pending[512:]
+            if len(pending):
+                yield np.pad(pending, (0, 512 - len(pending)))
+
+        for window in windows():
+            prob, state = self._model.feed(window, state=state, sample_rate=16000)
+            probability = float(np.asarray(prob).reshape(-1)[0])
+            if probability >= threshold:
+                silence_start = None
+                if speech_start is None:
+                    speech_start = max(0, position - pad)
+            elif probability < max(0.01, threshold - 0.15) and speech_start is not None:
+                if silence_start is None:
+                    silence_start = position
+                if position - silence_start >= min_silence:
+                    stop = min(total, silence_start + pad)
+                    if stop - speech_start >= min_speech or continuation:
+                        yield speech_start, stop, continuation
+                    speech_start = silence_start = None
+                    continuation = False
+            if speech_start is not None and position + 512 - speech_start >= MAX_SAMPLES:
+                stop = speech_start + MAX_SAMPLES
+                yield speech_start, stop, True
+                speech_start, continuation = stop, True
+            position += 512
+        if speech_start is not None and total > speech_start:
+            if total - speech_start >= min_speech or continuation:
+                yield speech_start, total, continuation
+
+    def close(self):
+        self._model = None
+        _optional_module("mlx.core", "vad").clear_cache()

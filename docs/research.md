@@ -102,31 +102,24 @@
 
 [Makale: A Large-Scale Multilingual Dataset for Speech Research](https://arxiv.org/pdf/2012.03411). **Okuma:** §3.2, §3.5, §4.1 ve §4.3. Sesli kitaplarda ASR pseudo-label’ları kitap metnine TF-IDF ve Smith–Waterman ile eşlenir; aday transkript–hipotez WER’iyle filtrelenir. Eğitim/geliştirme/test ayrımında konuşmacı çakışması engellenir; geliştirme/test metinleri insan tarafından düzeltilir. Pseudo-label’ın yanlış olabileceği açıkça belirtilir. Corpus sekiz Avrupa dili içerir; zh/ja/tr doğrulaması veya doğal podcast dağılımına doğrudan aktarım göstermez.
 
-## Bu deponun tasarım tercihleri ve mevcut sınırı
+## Bu deponun uygulama kararları ve kanıt sınırı
 
-Aşağıdaki tercihler yayınların birebir replikasyonu değildir. Mevcut çekirdek, ses–metin çiftlerinin yerel puanlanmasını ve sonuçların denetlenebilir olmasını hedefler; ham podcast’ten doğrulanmış TTS/ASR corpus’una uzanan bütün aşamaları tamamlamaz.
+Aşağıdaki tercihler yayınların birebir replikasyonu veya dört dilde ölçülmüş üstünlük iddiası değildir. Kabul edilen uygulama planının yerel MLX aşamalarıdır.
 
-| Mevcut kapsam | Ölçtüğü veya yaptığı | Sınırı |
+| Aşama | Uygulama | Kanıt sınırı |
 |---|---|---|
-| MLX Whisper ve verilen referans metinle CER | Dört hedef dilde ASR çıktısı–metin farkı | Referans metin ve ASR de hatalı olabilir; gerçek hata oranının bağımsız ölçümü değildir |
-| `en` / `tr` için WER | Kelime düzeyinde metin farkı | `zh` / `ja` için aynı kelime ayırma varsayımı uygulanmaz; CER de dört dil arasında doğrudan karşılaştırılabilir kalite standardı değildir |
-| İsteğe bağlı DNSMOS, CPU backend | Akustik kaliteye ilişkin ek skor | Native MLX değildir; içerik sadakati ve konuşmacı benzerliği değildir |
-| Birebir PCM kopya denetimi | Aynı PCM içerikli kayıtları belirleme | Yakın kopya, yeniden kodlanmış ses, tekrar yayımlanmış bölüm veya aynı metnin farklı seslendirmelerini bütünüyle çözmez |
-| İsteğe bağlı MLX Silero hazırlama | Konuşma bölgelerinden aday segment hazırlama | Diarization, overlap ayrıştırma veya kelime hizalama değildir |
-| Varsayılan olarak yalnız skor; ayrı kullanıcı eşikleri | Ölçümü kabul/red politikasından ayırma | Veriyle kalibre edilmedikçe eşiklerin kalite faydası doğrulanmış değildir |
+| Metin doğruluğu | MLX Whisper; dört dilde CER, en/tr için WER | Referans veya ASR hatalı olabilir; podcast pseudo-label'ı doğrulanmış ground truth değildir |
+| Akustik kalite | DNSMOS P.835 yerel MLX dönüşümü | ONNX sayısal eşdeğerliği kalite kalibrasyonu değildir; P.808 ile aynı skor değildir |
+| Hazırlama | Durumunu koruyan MLX Silero ve Nemotron; sınırlı FFmpeg tamponu | VAD kesilmiş kelimeleri tek başına doğrulayamaz; zorunlu kesimler review alır |
+| Konuşmacı / overlap | MLX Nemotron, bölüm içi aktivite ve eşzamanlılık | Sekiz kanal; düşük seviyeli eşzamanlı konuşmayı kaçırabilir; küresel kişi kimliği vermez |
+| Hizalama | en/zh/ja Qwen MLX; tr Wav2Vec2 MLX + CTC | Yapısal hizalama referansın doğru okunduğunu kanıtlamaz; Qwen confidence sağlamaz |
+| Konuşmacı benzerliği | MLX ECAPA; varsa referans benzerliği, yoksa iç tutarlılık | Referans yokken hedef kimliğinin korunduğu iddia edilmez |
+| Kalibrasyon | Dil × gerçek/sentetik grup örneklemesi ve insan etiketli politika değerlendirmesi | Kullanıcı dağılımında insan etiketleri ve held-out çalışma olmadan eşikler doğrulanmış sayılmaz |
+| Çıktı | Ayrı TTS/ASR politikaları, FLAC export, grup temelli train/validation/test | Bilinmeyen konuşmacılarda speaker-disjoint garantisi yoktur; kesin PCM kopyası yakın-kopya tespiti değildir |
 
-### Güçlü bir pipeline için henüz karşılanmayan gereksinimler
+Model dönüşümlerinin ölçümleri ve gerçek ses denemeleri [validation.md](validation.md) ile aşama doğrulama dosyalarında ayrıdır. FLEURS temel entegrasyon örnekleri gerçek podcast dağılımı veya sentetik üreticileri temsil etmez.
 
-Bu gereksinimler hedef kullanım ve kaynak kapsamına göre doğrulanmalıdır; hepsi her ASR/TTS hedefinde aynı ret politikasını gerektirmez.
-
-- **Podcast konuşmacı ve overlap denetimi:** diarization uygulanmış değildir. Tek konuşmacılı TTS çıktısı için speaker/overlap bilgisi gerekir; VAD bunu sağlamaz. Dayanak: R03, R17.
-- **Metin–ses hizası ve kesilmiş uçlar:** forced alignment uygulanmış değildir. Yanlış zaman sınırları, kısmi sözcükler ve yerel atlamalar yalnız kayıt geneli CER/WER ile bütünüyle tanımlanamaz. Dayanak: R01, R02, R11, R12, R17.
-- **Konuşmacı sadakati:** güvenilir referans sesle speaker similarity uygulanmış değildir. Sentetik sesin hedef konuşmacıyı koruması içerik doğruluğundan ayrı değerlendirme gerektirir. Dayanak: R15, R16, R18.
-- **Müzik/gürültü ve dönüşüm kaydı:** kaynak ayrıştırma uygulanmış değildir. R03/R17’deki ayrıştırma veya gürültü azaltma, orijinal ses üzerinde değişikliktir; çıktı bozulmaları ayrıca değerlendirilmelidir. Bu işlem bir kalite skoru yerine geçmez.
-- **Dil ve bağımsız doğrulayıcı:** ses/metin LID uyuşması ve çoklu ASR kıyası mevcut çekirdeğin parçası değildir. Özellikle hatalı altyazı ve code-switching için ayrı değerlendirme gerekir. Dayanak: R05, R06, R17.
-- **Kalibrasyon ve downstream kanıt:** dil, gerçek/sentetik kaynak, üretici, konuşmacı ve ifade tarzına göre insan denetimli örnekler; saklanan/eliminasyon adayı veride hata ve çeşitlilik incelemesi; gerçek held-out veri üzerinde filtre ablation’ı henüz gerekli çalışmalardır. R04, R14, R19, R20, R22 daha sıkı filtrenin otomatik olarak daha iyi olmadığını veya kalitenin birden çok eksende ölçülmesini destekler.
-
-Bu açık işler nedeniyle mevcut çekirdek “tamamlanmış kaliteli veri pipeline’ı” veya doğrulanmış dört dilli filtre olarak sunulmaz. Kaynak sonuçları, bu deponun filtre sonrasında eğitim kalitesini artırdığının ölçümü değildir.
+Kabul edilen planın dışındaki araştırma seçenekleri: kaynak ayrıştırma/müzik denetimi, bağımsız dil tanıma, çoklu ASR mutabakatı ve yakın-kopya tespiti. R03/R17'deki enhancement kaynak sesi değiştirir; bu depoda kalite ölçümü yerine sessizce uygulanmaz. Downstream TTS/ASR eğitimi, çeşitlilik kaybı ve filtre ablation'ı ayrıca ölçülmelidir (R04, R14, R19, R20, R22).
 
 ## Kapsam dışı bırakılanlar
 

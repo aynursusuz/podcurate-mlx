@@ -21,9 +21,19 @@ def sha256(path: Path) -> str:
 
 def duration(path: Path) -> float:
     p = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
-        capture_output=True, text=True, check=True,
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            str(path),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
     )
     value = float(p.stdout.strip())
     if not math.isfinite(value) or value <= 0:
@@ -37,9 +47,28 @@ def decode(path: Path, start: float, end: float) -> np.ndarray:
     if end - start > MAX_SECONDS + 1e-6:
         raise ValueError("audio span exceeds 30 seconds; run prepare first")
     p = subprocess.run(
-        ["ffmpeg", "-nostdin", "-v", "error", "-ss", str(start), "-i", str(path),
-         "-t", str(end - start), "-vn", "-ac", "1", "-ar", str(SAMPLE_RATE),
-         "-f", "f32le", "pipe:1"], capture_output=True, check=True,
+        [
+            "ffmpeg",
+            "-nostdin",
+            "-v",
+            "error",
+            "-ss",
+            str(start),
+            "-i",
+            str(path),
+            "-t",
+            str(end - start),
+            "-vn",
+            "-ac",
+            "1",
+            "-ar",
+            str(SAMPLE_RATE),
+            "-f",
+            "f32le",
+            "pipe:1",
+        ],
+        capture_output=True,
+        check=True,
     )
     audio = np.frombuffer(p.stdout, dtype="<f4").copy()
     if audio.size == 0 or not np.isfinite(audio).all():
@@ -60,3 +89,56 @@ def signals(audio: np.ndarray) -> dict:
         "silent": rms == 0,
         "pcm_sha256": hashlib.sha256(audio.astype("<f4").tobytes()).hexdigest(),
     }
+
+
+def stream(path: Path, start=0.0, end=None, block_samples=16000 * 20):
+    """Decode one continuous stream. RAM is bounded by block_samples, even for days of audio."""
+    import tempfile
+
+    if not math.isfinite(start) or start < 0 or (end is not None and end <= start):
+        raise ValueError("invalid stream boundaries")
+    if not 0 < block_samples <= 480000:
+        raise ValueError("block_samples must be within 1..480000")
+    command = ["ffmpeg", "-nostdin", "-v", "error", "-ss", str(start), "-i", str(path)]
+    if end is not None:
+        command += ["-t", str(end - start)]
+    command += ["-vn", "-ac", "1", "-ar", "16000", "-f", "f32le", "pipe:1"]
+    # Disk-backed stderr avoids a pipe deadlock without buffering an entire episode.
+    with tempfile.TemporaryFile() as errors:
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=errors)
+        try:
+            while raw := process.stdout.read(block_samples * 4):
+                audio = np.frombuffer(raw, dtype="<f4").copy()
+                if not np.isfinite(audio).all():
+                    raise ValueError("nonfinite audio")
+                yield audio
+            if process.wait():
+                errors.seek(0)
+                raise RuntimeError(errors.read(4096).decode(errors="replace"))
+        finally:
+            process.stdout.close()
+            if process.poll() is None:
+                process.terminate()
+            process.wait()
+
+
+def info(path: Path) -> dict:
+    import json
+
+    result = subprocess.run(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "a:0",
+            "-show_entries",
+            "stream=sample_rate,channels,duration_ts,time_base",
+            "-of",
+            "json",
+            str(path),
+        ],
+        capture_output=True,
+        check=True,
+    )
+    return json.loads(result.stdout)["streams"][0]
